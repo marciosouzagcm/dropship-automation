@@ -1,0 +1,348 @@
+
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <title>Pesquisa de Tendências</title>
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 20px;
+                    background-color: #f0f0f0;
+                }
+                
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: left;
+                }
+                
+                th {
+                    background-color: #f0f0f0;
+                }
+                
+                .container {
+                    max-width: 800px;
+                    margin: auto;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Pesquisa de Tendências</h1>
+                <table class="dataframe table table-striped">
+  <thead>
+    <tr style="text-align: right;">
+      <th>titulo</th>
+      <th>preco</th>
+      <th>url</th>
+      <th>imagem</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Aparelho De Jantar Ingrid Em Porcelana 20 Peças Cor Branco Tramontina</td>
+      <td>279.90</td>
+      <td><a href="https://www.mercadolivre.com.br/aparelho-de-jantar-ingrid-em-porcelana-20-pecas-cor-branco-tramontina/p/MLB33306579#wid=MLB4450893998&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_882228-MLU74422642000_022024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Conjunto De Taças De Vidro Para Vinho/ Água 490 Ml 6 Peças</td>
+      <td>65.42</td>
+      <td><a href="https://www.mercadolivre.com.br/conjunto-de-tacas-de-vidro-para-vinho-agua-490-ml-6-pecas/p/MLB23597116#wid=MLB4803283318&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_831650-MLU69748288165_062023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Aparelho De Jantar Pétala Com Taças 16 Peças Duralex Cor Branco Liso</td>
+      <td>119.90</td>
+      <td><a href="https://www.mercadolivre.com.br/aparelho-de-jantar-petala-com-tacas-16-pecas-duralex-cor-branco-liso/p/MLB32458818#wid=MLB4440827152&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_897849-MLU75811735692_042024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Kit Potes Plásticos Cinza 8 Unidades Electrolux</td>
+      <td>66.75</td>
+      <td><a href="https://www.mercadolivre.com.br/kit-potes-plasticos-cinza-8-unidades-electrolux/p/MLB23957789#wid=MLB3886183505&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_617025-MLU74978364255_032024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Conjunto 10 Potes Herméticos Com Tampa Easy-open Electrolux</td>
+      <td>90.68</td>
+      <td><a href="https://www.mercadolivre.com.br/conjunto-10-potes-hermeticos-com-tampa-easy-open-electrolux/p/MLB23194311#wid=MLB3747169740&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_795058-MLU76401226521_052024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jogo De Copos De Vidro Bristol Suco Agua 410ml Nadir C/12uni</td>
+      <td>61.09</td>
+      <td><a href="https://www.mercadolivre.com.br/jogo-de-copos-de-vidro-bristol-suco-agua-410ml-nadir-c12uni/p/MLB35998372#wid=MLB4936742814&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_683105-MLU75750584286_042024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Aparelho De Jantar E Chá 20 Peças Ryo Maresia Cor Muticor Oxford</td>
+      <td>357.00</td>
+      <td><a href="https://www.mercadolivre.com.br/aparelho-de-jantar-e-cha-20-pecas-ryo-maresia-cor-muticor-oxford/p/MLB33630217#wid=MLB4503975704&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_793689-MLU74450711102_022024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jogo Talheres Faqueiro Búzios Aço Inox 24 Peças Tramontina</td>
+      <td>57.95</td>
+      <td><a href="https://www.mercadolivre.com.br/jogo-talheres-faqueiro-buzios-aco-inox-24-pecas-tramontina/p/MLB35092029#wid=MLB5077425420&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_774561-MLU75467540811_032024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jogo De Pratos Rasos Duralex Vidro Nadir Opalino Kit 6 Unid</td>
+      <td>53.75</td>
+      <td><a href="https://www.mercadolivre.com.br/jogo-de-pratos-rasos-duralex-vidro-nadir-opalino-kit-6-unid/p/MLB24058954#wid=MLB4306261672&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_603922-MLU73605228232_122023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Mandolin Profissional Cortador Fatiador Legumes Frutas Inox</td>
+      <td>143.06</td>
+      <td><a href="https://www.mercadolivre.com.br/mandolin-profissional-cortador-fatiador-legumes-frutas-inox/p/MLB27072400#wid=MLB4805135476&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_607576-MLA79735469007_102024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jogo 12 Pratos Fundos Em Porcelana Com Estampa Mármore Preto</td>
+      <td>421.19</td>
+      <td><a href="https://www.mercadolivre.com.br/jogo-12-pratos-fundos-em-porcelana-com-estampa-marmore-preto/p/MLB29491236#wid=MLB5025400962&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_952773-MLU73807343221_012024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Marinex Conjunto De Assadeiras Oval Opaline 3 Peças Branco</td>
+      <td>71.94</td>
+      <td><a href="https://www.mercadolivre.com.br/marinex-conjunto-de-assadeiras-oval-opaline-3-pecas-branco/p/MLB27410145#wid=MLB4941124508&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_999536-MLU72675715044_112023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jogo De Panelas Tramontina Turim 7 Peças Em Alumínio Com Revestimento Antiaderente Vermelho</td>
+      <td>298.34</td>
+      <td><a href="https://www.mercadolivre.com.br/jogo-de-panelas-tramontina-turim-7-pecas-em-aluminio-com-revestimento-antiaderente-vermelho/p/MLB32486155#wid=MLB4856576850&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_964299-MLU74471708651_022024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Kit 6 Copos 330ml Jarra 1,2l De Cristal Palm Tree Coqueiros</td>
+      <td>181.14</td>
+      <td><a href="https://www.mercadolivre.com.br/kit-6-copos-330ml-jarra-12l-de-cristal-palm-tree-coqueiros/p/MLB27528420#wid=MLB3806226985&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_730806-MLU72079984146_102023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Frigideira Tramontina Turim Com Tampa 16 E 20 Cm Vermelho</td>
+      <td>78.15</td>
+      <td><a href="https://www.mercadolivre.com.br/frigideira-tramontina-turim-com-tampa-16-e-20-cm-vermelho/p/MLB34194020#wid=MLB3684094295&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_994966-MLA74819170650_032024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Copo Americano Caixa Com 24 Unidades Nadir 190ml</td>
+      <td>29.95</td>
+      <td><a href="https://www.mercadolivre.com.br/copo-americano-caixa-com-24-unidades-nadir-190ml/p/MLB23246066#wid=MLB3523042601&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_945944-MLU73466586820_122023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Galeteiro Vidro Spray Borrifador Vinagre Azeite Oleo 100ml</td>
+      <td>12.36</td>
+      <td><a href="https://www.mercadolivre.com.br/galeteiro-vidro-spray-borrifador-vinagre-azeite-oleo-100ml/p/MLB28839493#wid=MLB3947260649&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_605350-MLU75459492397_032024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Kit Com 5 Tigelas Bowls Em Aço Inox De Excelente Qualidade</td>
+      <td>66.44</td>
+      <td><a href="https://www.mercadolivre.com.br/kit-com-5-tigelas-bowls-em-aco-inox-de-excelente-qualidade/p/MLB26086818#wid=MLB3528455363&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_981546-MLU78465820648_082024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Pote Com Trava Vasilha Erca Plast Micro E Freezer 750ml Reutilizável Cor Transparente Premium 12 Unidades</td>
+      <td>42.86</td>
+      <td><a href="https://www.mercadolivre.com.br/pote-com-trava-vasilha-erca-plast-micro-e-freezer-750ml-reutilizavel-cor-transparente-premium-12-unidades/p/MLB27587442#wid=MLB3482651617&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_724786-MLA81307124336_122024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Açucareiro Inox Metálico Com Colher Kehome 300ml Ref: 5210 Cor Prateado</td>
+      <td>12.63</td>
+      <td><a href="https://www.mercadolivre.com.br/acucareiro-inox-metalico-com-colher-kehome-300ml-ref-5210-cor-prateado/p/MLB24712649#wid=MLB5094689756&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_642669-MLU73785599740_012024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Pinça Inox Culinária Bar Bartender Gastronomia Chef Aquario Cor Reta</td>
+      <td>39.90</td>
+      <td><a href="https://www.mercadolivre.com.br/pinca-inox-culinaria-bar-bartender-gastronomia-chef-aquario-cor-reta/p/MLB43797654#wid=MLB3918197903&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_928413-MLA80949561205_112024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jogo Kit 6 Copos Vidro Grosso 400ml Água Suco Drink Premium Cor Transparente</td>
+      <td>36.90</td>
+      <td><a href="https://www.mercadolivre.com.br/jogo-kit-6-copos-vidro-grosso-400ml-agua-suco-drink-premium-cor-transparente/p/MLB23212928#wid=MLB3672979187&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_712774-MLU69370460031_052023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Seca Salada Centrífuga Secador Folhas Verduras Legumes 5l</td>
+      <td>65.90</td>
+      <td><a href="https://www.mercadolivre.com.br/seca-salada-centrifuga-secador-folhas-verduras-legumes-5l/p/MLB28855925#wid=MLB5147364984&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_847892-MLU73328335924_122023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>D. Home 4 Potes Hermético Vidro Marmita 640ml Forno Refratário Cor Azul-celeste</td>
+      <td>55.50</td>
+      <td><a href="https://www.mercadolivre.com.br/d-home-4-potes-hermetico-vidro-marmita-640ml-forno-refratario-cor-azul-celeste/p/MLB32407169#wid=MLB4632177964&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_879107-MLU74330427776_022024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>10 Travessas 30 Cm Aço Inox Rasa Oval Prata P/ Servir Porção Cor Prateado</td>
+      <td>78.44</td>
+      <td><a href="https://www.mercadolivre.com.br/10-travessas-30-cm-aco-inox-rasa-oval-prata-p-servir-porco-cor-prateado/p/MLB34966215#wid=MLB3921769669&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_647903-MLU78483387617_082024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Amassador De Batatas E Feijão Tramontina Utilitá Inox Preto</td>
+      <td>38.54</td>
+      <td><a href="https://www.mercadolivre.com.br/amassador-de-batatas-e-feijo-tramontina-utilita-inox-preto/p/MLB24653623#wid=MLB3978187382&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_809288-MLU74163673567_012024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Taça De Vinho, Jogo De Taça De Vinho, Ruvolo 490ml 6 Peças</td>
+      <td>67.49</td>
+      <td><a href="https://www.mercadolivre.com.br/taca-de-vinho-jogo-de-taca-de-vinho-ruvolo-490ml-6-pecas/p/MLB26148376#wid=MLB3911631056&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_713513-MLU71134471985_082023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Espatula De Silicone Color Reforçada 28 Cm 3 Unidades Cor Colorida</td>
+      <td>21.50</td>
+      <td><a href="https://www.mercadolivre.com.br/espatula-de-silicone-color-reforcada-28-cm-3-unidades-cor-colorida/p/MLB24731311#wid=MLB3896667817&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_854318-MLU78019895781_072024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Caneca Harry Potter Cartoon Branca Presente Personalizado Cor Branco</td>
+      <td>25.15</td>
+      <td><a href="https://www.mercadolivre.com.br/caneca-harry-potter-cartoon-branca-presente-personalizado-cor-branco/p/MLB39766772#wid=MLB5209136134&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_612837-MLU78684388265_082024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Aparelho De Jantar 30 Peças Ryo Maresia Oxford</td>
+      <td>594.00</td>
+      <td><a href="https://www.mercadolivre.com.br/aparelho-de-jantar-30-pecas-ryo-maresia-oxford/p/MLB34115624#wid=MLB3669535743&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_934814-MLU74826641559_022024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jogo De Pratos Fundos 6 Peças Branco Duralex Opaline Vidro</td>
+      <td>53.24</td>
+      <td><a href="https://www.mercadolivre.com.br/jogo-de-pratos-fundos-6-pecas-branco-duralex-opaline-vidro/p/MLB23120599#wid=MLB4306209642&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_756296-MLU76003941607_042024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Kit 20 Potes 500 Ml Transparente Marmita Fitnees Bpa Free Scm Utilidades</td>
+      <td>37.50</td>
+      <td><a href="https://www.mercadolivre.com.br/kit-20-potes-500-ml-transparente-marmita-fitnees-bpa-free-scm-utilidades/p/MLB32030523#wid=MLB3847316661&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_895470-MLA79830315531_102024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Cesto Forma Silicone Airfryer 20cm Antiaderente 2 Unidades</td>
+      <td>10.37</td>
+      <td><a href="https://www.mercadolivre.com.br/cesto-forma-silicone-airfryer-20cm-antiaderente-2-unidades/p/MLB25591949#wid=MLB3893784537&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_994263-MLU76456137178_052024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>20 Taça Gin Acrílico 450ml Cor Transparente</td>
+      <td>67.25</td>
+      <td><a href="https://www.mercadolivre.com.br/20-taca-gin-acrilico-450ml-cor-transparente/p/MLB35736352#wid=MLB5063974846&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_925754-MLU75754045667_042024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Escorredor De Aço Inox 16 Pratos Com Porta Talheres Inox</td>
+      <td>124.90</td>
+      <td><a href="https://www.mercadolivre.com.br/escorredor-de-aco-inox-16-pratos-com-porta-talheres-inox/p/MLB21969221#wid=MLB3726945427&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_628017-MLU72569137684_112023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jarra De Vidro Borossilicato Com Tampa De Inox 1,8 Litros</td>
+      <td>49.57</td>
+      <td><a href="https://www.mercadolivre.com.br/jarra-de-vidro-borossilicato-com-tampa-de-inox-18-litros/p/MLB38939800#wid=MLB5247667354&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_719849-MLU78156832799_082024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Concha Pequena Para Servir Molho Caldo Metal Inox Oferta</td>
+      <td>12.05</td>
+      <td><a href="https://www.mercadolivre.com.br/concha-pequena-para-servir-molho-caldo-metal-inox-oferta/p/MLB28808285#wid=MLB3717304345&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_911992-MLU73302415712_122023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Praticpack Oriental Berço Molheira Cor Preto 30ml 6cm X 3cm Pote Descartável Molho Com Tampa</td>
+      <td>123.16</td>
+      <td><a href="https://www.mercadolivre.com.br/praticpack-oriental-berco-molheira-cor-preto-30ml-6cm-x-3cm-pote-descartavel-molho-com-tampa/p/MLB36360285#wid=MLB3813276173&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_967304-MLU78644651405_082024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jogo C/ 2 Copos Vidro Time Palmeiras Oficial 60ml</td>
+      <td>35.21</td>
+      <td><a href="https://www.mercadolivre.com.br/jogo-c-2-copos-vidro-time-palmeiras-oficial-60ml/p/MLB23220636#wid=MLB3943872705&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_711788-MLU69375520583_052023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Aparelho De Jantar Tramontina Abstratta 20 Peças Cor Branco Liso</td>
+      <td>274.99</td>
+      <td><a href="https://www.mercadolivre.com.br/aparelho-de-jantar-tramontina-abstratta-20-pecas-cor-branco-liso/p/MLB33307309#wid=MLB4477864242&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_881693-MLU74544806993_022024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Seringa Injetora De Temperos Molhos Carnes Frango Costela Agulha Casasonho</td>
+      <td>27.90</td>
+      <td><a href="https://www.mercadolivre.com.br/seringa-injetora-de-temperos-molhos-carnes-frango-costela-agulha-casasonho/p/MLB43559661#wid=MLB3916327899&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_643027-MLA80888555235_112024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jarra Plástico Suco Reforçada Lava-louça Atoxica 3,5l 4un Cor Transparente</td>
+      <td>48.69</td>
+      <td><a href="https://www.mercadolivre.com.br/jarra-plastico-suco-reforcada-lava-louca-atoxica-35l-4un-cor-transparente/p/MLB44339542#wid=MLB3923766541&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_746655-MLA80823753064_122024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Kit 12 Colheres Café Tramontina Aço Inox</td>
+      <td>22.61</td>
+      <td><a href="https://www.mercadolivre.com.br/kit-12-colheres-cafe-tramontina-aco-inox/p/MLB27331607#wid=MLB4088096144&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_848505-MLU76532145616_052024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Jogo 6 Taças Vidro De Vinho / Água - Laradore Diamond 325ml</td>
+      <td>54.99</td>
+      <td><a href="https://www.mercadolivre.com.br/jogo-6-tacas-vidro-de-vinho-agua-laradore-diamond-325ml/p/MLB43888093#wid=MLB5196119236&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_781676-MLA80697665944_112024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Desfiador De Frango Manual De Plástico 20cm</td>
+      <td>37.75</td>
+      <td><a href="https://www.mercadolivre.com.br/desfiador-de-frango-manual-de-plastico-20cm/p/MLB28343136#wid=MLB5055711218&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_884401-MLU73048162253_112023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Kit Escorredor De Macarrão Massas+escorredor Arroz Aço Inox</td>
+      <td>42.90</td>
+      <td><a href="https://www.mercadolivre.com.br/kit-escorredor-de-macarro-massasescorredor-arroz-aco-inox/p/MLB25203291#wid=MLB3845170303&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_858680-MLA80409215512_112024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Meleira Pearl C/ Tampa Pegador De Mel Cristal Wolff 28380</td>
+      <td>30.71</td>
+      <td><a href="https://www.mercadolivre.com.br/meleira-pearl-c-tampa-pegador-de-mel-cristal-wolff-28380/p/MLB26319863#wid=MLB3961739426&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_638295-MLU73969423948_012024-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Espremedor De Alho De Cozinha Resistente Em Aço Inox Kehome</td>
+      <td>26.25</td>
+      <td><a href="https://www.mercadolivre.com.br/espremedor-de-alho-de-cozinha-resistente-em-aco-inox-kehome/p/MLB24652418#wid=MLB5057781198&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_650270-MLU72565704948_112023-I.jpg" width="50"></td>
+    </tr>
+    <tr>
+      <td>Presente Casamento Kit 06 Copos Dubai Nadir Figueiredo</td>
+      <td>46.80</td>
+      <td><a href="https://www.mercadolivre.com.br/presente-casamento-kit-06-copos-dubai-nadir-figueiredo/p/MLB25095987#wid=MLB4770911510&sid=unknown" target="_blank">Link</a></td>
+      <td><img src="http://http2.mlstatic.com/D_789046-MLU70668796390_072023-I.jpg" width="50"></td>
+    </tr>
+  </tbody>
+</table>
+            </div>
+        </body>
+        </html>
+        

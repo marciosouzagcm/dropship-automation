@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Pesquisa de Tendências</title>
+    <!-- Link para o CSS do Bootstrap para estilização -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        /* Estilos básicos para o corpo da página */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        /* Estilos para o container centralizado */
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        /* Estilos para o título */
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pesquisa de Tendências</h1>
+        <!-- Formulário para entrada do termo de pesquisa -->
+        <form method="POST">
+            <div class="form-group">
+                <label for="termo">Termo de Pesquisa:</label>
+                <input type="text" class="form-control" id="termo" name="termo" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Pesquisar</button>
+        </form>
+    </div>
+</body>
+</html>

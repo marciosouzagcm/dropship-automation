@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "product_payload.schema.json",
+  "title": "product_payload",
+  "description": "Contrato de dados único usado na transição Sub-Agente 1 (Mineração) -> Worker (Edição/Geração de Conteúdo) -> Sub-Agente 2 (Aprovação Telegram) -> Sub-Agente 3 (Callback & Distribuição). Todo nó do n8n e todo módulo do worker deve ler/escrever exatamente estas chaves.",
+  "type": "object",
+  "required": ["product_id", "title", "affiliate_link", "media", "copywriting", "approval"],
+  "properties": {
+    "product_id": { "type": "string", "description": "Identificador único do job/produto, usado em todas as filas Redis e callbacks do Telegram. Gerado pelo Sub-Agente 1 (node 'Normalizar Entrada + Gerar product_id') com crypto.randomUUID() e propagado sem alteração por toda a cadeia." },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "raw_product_url": { "type": "string", "format": "uri" },
+    "affiliate_link": {
+      "type": "string",
+      "format": "uri",
+      "description": "SEMPRE preenchido — em caso de falha na API de afiliados, o worker faz fallback para raw_product_url (nunca vazio/null). Gerado exclusivamente por worker/services/affiliate.py."
+    },
+    "category": { "type": "string" },
+    "price": {
+      "type": "object",
+      "properties": {
+        "original": { "type": "number", "minimum": 0 },
+        "promotional": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "enum": ["BRL", "USD"], "default": "BRL" }
+      }
+    },
+    "media": {
+      "type": "object",
+      "properties": {
+        "raw_images": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "raw_videos": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "rendered_video_path": { "type": ["string", "null"] },
+        "thumbnail_path": { "type": ["string", "null"] }
+      }
+    },
+    "copywriting": {
+      "type": "object",
+      "properties": {
+        "telegram_post": { "type": "string" },
+        "instagram_caption": { "type": "string" },
+        "tiktok_caption": { "type": "string" },
+        "hashtags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED", "ERROR"] },
+        "approved_at": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "extras": {
+      "type": "object",
+      "description": "Campos auxiliares específicos do worker (não fazem parte do contrato mínimo, mas trafegam junto).",
+      "properties": {
+        "audio_narracao_path": { "type": ["string", "null"] },
+        "srt_path": { "type": ["string", "null"] }
+      }
+    },
+    "erro": {
+      "type": "string",
+      "description": "Preenchido apenas quando approval.status = ERROR — motivo legível para debug/log. Lido pelo Sub-Agente 2 para decidir entre alertar erro ou seguir com aprovação normal."
+    }
+  },
+  "examples": [
+    {
+      "product_id": "8f2a1c3d-91e4-4b2a-9c3d-1a2b3c4d5e6f",
+      "title": "Suporte de Celular Magnético para Carro",
+      "description": "Suporte magnético 360° compatível com todos os smartphones.",
+      "raw_product_url": "https://shopee.com.br/produto/991827",
+      "affiliate_link": "https://s.shopee.com.br/aB3xYz9K",
+      "category": "Acessórios Automotivos",
+      "price": { "original": 49.90, "promotional": 39.90, "currency": "BRL" },
+      "media": {
+        "raw_images": ["https://cdn.exemplo.com/raw/991827.jpg"],
+        "raw_videos": ["https://cdn.exemplo.com/raw/991827_ref1.mp4"],
+        "rendered_video_path": "/data/assets/processed/8f2a1c3d-91e4-4b2a-9c3d-1a2b3c4d5e6f.mp4",
+        "thumbnail_path": "/data/assets/processed/8f2a1c3d-91e4-4b2a-9c3d-1a2b3c4d5e6f_thumb.jpg"
+      },
+      "copywriting": {
+        "telegram_post": "🚗 Suporte magnético que vira o jogo no seu carro!",
+        "instagram_caption": "Você está estacionando errado esse tempo todo 🚗🔧 #achadinhos",
+        "tiktok_caption": "Achadinho que vai mudar sua rotina no carro 🔥",
+        "hashtags": ["#dropshipping", "#achadinhos", "#carrogadget"]
+      },
+      "approval": { "status": "PENDING", "approved_at": null },
+      "extras": {
+        "audio_narracao_path": "/data/assets/audio/8f2a1c3d-91e4-4b2a-9c3d-1a2b3c4d5e6f_narracao.mp3",
+        "srt_path": "/data/assets/processed/8f2a1c3d-91e4-4b2a-9c3d-1a2b3c4d5e6f.srt"
+      }
+    }
+  ]
+}

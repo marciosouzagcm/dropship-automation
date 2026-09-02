@@ -1,0 +1,8 @@
+AppData/ 
+.venv/ 
+node_modules/ 
+*.log 
+Projeto_Stellar_DerivexDao/ 
+target/ 
+.env 
+logs/ 

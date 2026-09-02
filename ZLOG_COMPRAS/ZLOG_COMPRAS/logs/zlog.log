@@ -1,0 +1,42 @@
+2025-05-15T03:49:51.685-03:00  INFO 15504 --- [zlog_compras] [restartedMain] com.ZlogComprasApplication               : Starting ZlogComprasApplication using Java 21.0.7 with PID 15504 (C:\Users\DELL\ZLOG_COMPRAS\ZLOG_COMPRAS\target\classes started by DELL in C:\Users\DELL\ZLOG_COMPRAS\ZLOG_COMPRAS)
+2025-05-15T03:49:51.686-03:00  INFO 15504 --- [zlog_compras] [restartedMain] com.ZlogComprasApplication               : No active profile set, falling back to 1 default profile: "default"
+2025-05-15T03:49:56.702-03:00  INFO 15504 --- [zlog_compras] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-15T03:49:56.914-03:00  INFO 15504 --- [zlog_compras] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 202 ms. Found 9 JPA repository interfaces.
+2025-05-15T03:49:57.107-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-05-15T03:49:57.110-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-15T03:49:57.110-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+2025-05-15T03:49:57.134-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-15T03:49:57.134-03:00  INFO 15504 --- [zlog_compras] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 5442 ms
+2025-05-15T03:49:57.202-03:00  INFO 15504 --- [zlog_compras] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2025-05-15T03:49:57.206-03:00  INFO 15504 --- [zlog_compras] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection conn50: url=jdbc:h2:mem:d48c17f7-32e9-46f7-aa5d-d718b85f2199 user=SA
+2025-05-15T03:49:57.208-03:00  INFO 15504 --- [zlog_compras] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2025-05-15T03:49:57.211-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-15T03:49:57.214-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-05-15T03:49:57.243-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-15T03:49:57.247-03:00  INFO 15504 --- [zlog_compras] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-5)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-05-15T03:49:57.391-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-15T03:49:57.413-03:00  INFO 15504 --- [zlog_compras] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-15T03:49:57.668-03:00  WARN 15504 --- [zlog_compras] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-15T03:49:57.714-03:00 DEBUG 15504 --- [zlog_compras] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 24 mappings in 'requestMappingHandlerMapping'
+2025-05-15T03:49:57.776-03:00 DEBUG 15504 --- [zlog_compras] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2025-05-15T03:49:57.789-03:00 DEBUG 15504 --- [zlog_compras] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-05-15T03:49:57.806-03:00 DEBUG 15504 --- [zlog_compras] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-05-15T03:49:57.826-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:d48c17f7-32e9-46f7-aa5d-d718b85f2199'
+2025-05-15T03:49:57.860-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-05-15T03:49:57.888-03:00  INFO 15504 --- [zlog_compras] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-05-15T03:49:57.898-03:00  INFO 15504 --- [zlog_compras] [restartedMain] com.ZlogComprasApplication               : Started ZlogComprasApplication in 6.531 seconds (process running for 2678.023)
+2025-05-15T03:49:57.901-03:00  INFO 15504 --- [zlog_compras] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2025-05-15T03:49:59.306-03:00  INFO 15504 --- [zlog_compras] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-05-15T03:49:59.311-03:00  INFO 15504 --- [zlog_compras] [Thread-20] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-15T03:49:59.330-03:00  INFO 15504 --- [zlog_compras] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-05-15T03:49:59.332-03:00  INFO 15504 --- [zlog_compras] [Thread-20] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-15T03:49:59.335-03:00  WARN 15504 --- [zlog_compras] [Thread-20] o.s.b.f.support.DisposableBeanAdapter    : Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-232]
+2025-05-15T03:49:59.336-03:00  INFO 15504 --- [zlog_compras] [Thread-20] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown initiated...
+2025-05-15T03:49:59.337-03:00  INFO 15504 --- [zlog_compras] [Thread-20] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown completed.

@@ -1,0 +1,23 @@
+{
+  "name": "app_mercadolivre_pesquisas",
+  "version": "1.0.0",
+  "description": "Aplicativo de pesquisas no Mercado Livre",
+  "main": "servidor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "Mercado",
+    "Livre",
+    "pesquisas",
+    "API"
+  ],
+  "author": "Marcio Almeida de Souza",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "googleapis": "^144.0.0"
+  }
+}

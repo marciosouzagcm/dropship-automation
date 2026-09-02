@@ -1,0 +1,127 @@
+{
+  "name": "Sub-Agente 1 - Mineracao (Normaliza e Enfileira)",
+  "notes": "CORREÇÃO ARQUITETURAL (auditoria v2.1): este workflow tem a responsabilidade única de normalizar a entrada, identificar a origem, gerar um product_id único e enfileirar o job cru em fila:jobs_mineracao no Redis. Quem gera o affiliate_link é o worker Python (media-processor) que consome essa fila.",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-manual",
+      "name": "Ao Clicar em Executar",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-200, 140]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            { "name": "origem", "value": "mercado_livre" },
+            {
+              "name": "raw_product_url",
+              "value": "https://produto.mercadolivre.com.br/MLB-3382718305-microfone-lapela-sem-fio-k9-tipo-c-e-lightning-iphone-androi-_JM"
+            }
+          ]
+        }
+      },
+      "id": "mock-test-data",
+      "name": "Dados de Teste Manual",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [40, 140]
+    },
+    {
+      "id": "trigger-webhook",
+      "name": "Webhook: Novo Produto Minerado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-200, 300],
+      "parameters": {
+        "path": "novo-produto-minerado",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      }
+    },
+    {
+      "id": "normalize-input",
+      "name": "Normalizar Entrada + Gerar product_id",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [40, 300],
+      "notes": "Normaliza payloads heterogêneos, detecta automaticamente a origem pela URL se não fornecida, valida segredo do webhook e gera product_id único.",
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const crypto = require('crypto');\n\n// Validação opcional de segredo de webhook (se configurado nas variáveis de ambiente)\nconst vindoDeWebhook = $json.headers !== undefined;\nconst secretEsperado = $env.WEBHOOK_SHARED_SECRET;\nif (vindoDeWebhook && secretEsperado) {\n  const secretRecebido = $json.headers['x-webhook-secret'];\n  if (secretRecebido !== secretEsperado) {\n    throw new Error('Webhook não autorizado: header x-webhook-secret ausente ou incorreto.');\n  }\n}\n\nconst body = $json.body || $json || {};\n\n// Mapeamento de URL e extração do product_id\nconst rawUrl = (body.raw_product_url || body.url_produto || body.url || '').toString().trim();\nconst productId = (body.product_id || '').toString().trim() || crypto.randomUUID();\n\n// Detecção automática de origem se vier vazia ou desconhecida\nlet origem = (body.origem || '').toString().toLowerCase().trim();\nif (!origem && rawUrl) {\n  if (rawUrl.includes('shopee.')) origem = 'shopee';\n  else if (rawUrl.includes('aliexpress.')) origem = 'aliexpress';\n  else if (rawUrl.includes('mercadolivre.') || rawUrl.includes('mercadolibre.')) origem = 'mercado_livre';\n}\nif (origem === 'mercadolivre') origem = 'mercado_livre';\n\n// Extração de preço numérico\nconst precoBruto = body?.price?.promotional ?? body?.price?.original ?? body?.preco ?? body?.price ?? 0;\nconst precoNum = Number(precoBruto) || 0;\n\nreturn [{\n  json: {\n    product_id: productId,\n    origem: origem,\n    raw_product_url: rawUrl,\n    title: body.title || body.titulo || body.nome || 'Produto Minerado',\n    category: body.category || body.categoria || 'Geral',\n    price: {\n      original: Number(body?.price?.original ?? precoNum),\n      promotional: precoNum,\n      currency: body?.price?.currency || 'BRL'\n    },\n    media: {\n      raw_images: Array.isArray(body?.media?.raw_images) ? body.media.raw_images : (Array.isArray(body?.raw_images) ? body.raw_images : (body?.raw_images ? [body.raw_images] : [])),\n      raw_videos: Array.isArray(body?.media?.raw_videos) ? body.media.raw_videos : (Array.isArray(body?.raw_videos) ? body.raw_videos : (body?.raw_videos ? [body.raw_videos] : []))\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "validate-input",
+      "name": "IF: Origem e URL Válidas?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [280, 300],
+      "notes": "Garante que a URL não seja vazia e que a origem pertença a um dos marketplaces suportados.",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.raw_product_url }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEquals" }
+            },
+            {
+              "leftValue": "={{ ['shopee', 'aliexpress', 'mercado_livre'].includes($json.origem) }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "redis-push-job",
+      "name": "Redis: Push fila:jobs_mineracao",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [520, 220],
+      "parameters": {
+        "operation": "push",
+        "list": "fila:jobs_mineracao",
+        "messageData": "={{ JSON.stringify($json) }}",
+        "tail": false
+      }
+    },
+    {
+      "id": "code-rejeitar-entrada-invalida",
+      "name": "Log: Entrada Inválida Rejeitada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 420],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "console.warn(`Job rejeitado por origem/URL inválida: ${JSON.stringify($json)}`);\nreturn [{ json: { ...$json, rejeitado: true, motivo: 'origem_ou_url_invalida' } }];"
+      }
+    }
+  ],
+  "connections": {
+    "Ao Clicar em Executar": {
+      "main": [[{ "node": "Dados de Teste Manual", "type": "main", "index": 0 }]]
+    },
+    "Dados de Teste Manual": {
+      "main": [[{ "node": "Normalizar Entrada + Gerar product_id", "type": "main", "index": 0 }]]
+    },
+    "Webhook: Novo Produto Minerado": {
+      "main": [[{ "node": "Normalizar Entrada + Gerar product_id", "type": "main", "index": 0 }]]
+    },
+    "Normalizar Entrada + Gerar product_id": {
+      "main": [[{ "node": "IF: Origem e URL Válidas?", "type": "main", "index": 0 }]]
+    },
+    "IF: Origem e URL Válidas?": {
+      "main": [
+        [{ "node": "Redis: Push fila:jobs_mineracao", "type": "main", "index": 0 }],
+        [{ "node": "Log: Entrada Inválida Rejeitada", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" }
+}

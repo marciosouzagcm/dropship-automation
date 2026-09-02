@@ -1,0 +1,174 @@
+# =============================================================================
+# PROJETO: Automação de Dropshipping + Marketing de Conteúdo (Human-in-the-Loop)
+# STACK: n8n (orquestração) + Redis (filas) + Python/FFmpeg (processamento de mídia)
+# =============================================================================
+
+networks:
+  automation_net:
+    driver: bridge
+
+volumes:
+  n8n_data:        # Estado interno do n8n (credenciais, execuções, chaves)
+  redis_data:       # Persistência do Redis (filas / cache)
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # 1) N8N - Orquestrador central dos 3 sub-agentes
+  # ---------------------------------------------------------------------------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n_orchestrator
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - NODE_ENV=production
+      - WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:5678/}
+      - GENERIC_TIMEZONE=${TIMEZONE:-America/Sao_Paulo}
+      - TZ=${TIMEZONE:-America/Sao_Paulo}
+      # Autenticação básica do editor n8n (recomendado em produção)
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-changeme}
+      # Uso de fila (Redis) para execuções pesadas em modo "queue"
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      # CORREÇÃO (auditoria de segurança v2.1): o Redis agora exige senha
+      # (ver serviço `redis` abaixo). Sem esta variável o n8n não
+      # conseguiria autenticar na fila de execuções.
+      - QUEUE_BULL_REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      # Permissões de Segurança para uso de variáveis no n8n ($env)
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - N8N_ENVS_MODE=pass-through
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./workflows:/home/node/.n8n/workflows           # workflows exportados (JSON)
+      - ./assets:/data/assets                           # mídia bruta e processada (compartilhado)
+      - ./scripts:/data/scripts                          # scripts python/bash acionados pelo n8n
+      - ./templates:/data/templates                       # templates de vídeo/legenda
+    depends_on:
+      - redis
+    networks:
+      - automation_net
+
+  # ---------------------------------------------------------------------------
+  # 2) REDIS - Fila assíncrona (desacopla mineração/edição de vídeo do n8n)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: redis_queue
+    restart: unless-stopped
+    # CORREÇÃO CRÍTICA (auditoria de segurança v2.1): antes o Redis não
+    # exigia senha e ainda publicava a porta 6379 no host, ficando
+    # acessível por qualquer processo/máquina que alcançasse esta porta —
+    # incluindo leitura/escrita de tokens de acesso (ml_auth_tokens) e das
+    # filas de jobs. Se REDIS_PASSWORD não estiver definido em .env, o
+    # comando abaixo ainda inicia (compatibilidade com dev), mas o valor
+    # deve SEMPRE ser preenchido em qualquer ambiente exposto à rede.
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-}"]
+    ports:
+      # Considere remover este mapeamento em produção — o Redis só
+      # precisa ser alcançado pelos outros containers na `automation_net`,
+      # não pelo host. Mantido por padrão para facilitar debug local
+      # (`redis-cli -a $REDIS_PASSWORD -h localhost`).
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - automation_net
+
+  # ---------------------------------------------------------------------------
+  # 3) MEDIA-PROCESSOR - Container dedicado: Python 3.11 + FFmpeg
+  #    Responsável pela geração transformativa de vídeo e pela geração do
+  #    affiliate_link (única fonte de verdade — ver worker/services/affiliate.py)
+  # ---------------------------------------------------------------------------
+  media-processor:
+    build:
+      context: .                                   # raiz do projeto (para alcançar ./worker/requirements.txt)
+      dockerfile: docker/python-ffmpeg/Dockerfile
+    container_name: media_processor
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=${TIMEZONE:-America/Sao_Paulo}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}
+      - TTS_PROVIDER=${TTS_PROVIDER:-elevenlabs}
+      - WHISPER_MODEL_SIZE=${WHISPER_MODEL_SIZE:-base}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - TELEGRAM_CHANNEL_ID=${TELEGRAM_CHANNEL_ID}
+      - SHOPEE_AFFILIATE_APP_ID=${SHOPEE_AFFILIATE_APP_ID}
+      - SHOPEE_APP_KEY=${SHOPEE_APP_KEY}
+      - ALIEXPRESS_APP_KEY=${ALIEXPRESS_APP_KEY}
+      - ALIEXPRESS_APP_SECRET=${ALIEXPRESS_APP_SECRET}
+      - ALIEXPRESS_TRACKING_ID=${ALIEXPRESS_TRACKING_ID}
+      - MERCADO_LIVRE_CLIENT_ID=${MERCADO_LIVRE_CLIENT_ID}
+      - MERCADO_LIVRE_CLIENT_SECRET=${MERCADO_LIVRE_CLIENT_SECRET}
+      - INSTAGRAM_GRAPH_API_TOKEN=${INSTAGRAM_GRAPH_API_TOKEN}
+      - INSTAGRAM_BUSINESS_ACCOUNT_ID=${INSTAGRAM_BUSINESS_ACCOUNT_ID}
+      - TIKTOK_CONTENT_POSTING_TOKEN=${TIKTOK_CONTENT_POSTING_TOKEN}
+      - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL:-http://n8n_orchestrator:5678}
+      # CORREÇÃO CRÍTICA (auditoria v2.1): esta é a chamada que faltava
+      # entre o worker e o Sub-Agente 2 — ver worker/worker.py::_notificar_aprovacao.
+      - N8N_WEBHOOK_APROVACAO_PATH=${N8N_WEBHOOK_APROVACAO_PATH:-/webhook/conteudo-pronto-aprovacao}
+      # URL pública onde `assets/processed` é servido (ver serviço `assets-server`
+      # abaixo, ou substitua por Cloudflare Tunnel/S3/R2 em produção).
+      - PUBLIC_ASSETS_BASE_URL=${PUBLIC_ASSETS_BASE_URL:-}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - ASSETS_DIR=/data/assets
+    volumes:
+      - ./assets:/data/assets
+      - ./worker:/app/worker            # pacote Python do worker (config.py, worker.py, services/)
+      - ./templates:/data/templates
+    working_dir: /app
+    # Executa como módulo (-m) para que os imports `from worker import config`
+    # e `from worker.services import ...` funcionem corretamente dentro do pacote.
+    command: ["python3", "-m", "worker.worker"]
+    depends_on:
+      - redis
+    networks:
+      - automation_net
+
+  # ---------------------------------------------------------------------------
+  # 4) ASSETS-SERVER (novo em v2.1) - Nginx simples servindo /data/assets/processed
+  #    Fecha a lacuna documentada no README: Instagram Graph API e TikTok
+  #    Content Posting API exigem URL pública para o vídeo, e antes nada
+  #    servia esses arquivos. Combine com Cloudflare Tunnel/proxy reverso
+  #    apontando para este serviço e preencha PUBLIC_ASSETS_BASE_URL no .env
+  #    com a URL pública resultante.
+  # ---------------------------------------------------------------------------
+  assets-server:
+    image: nginx:alpine
+    container_name: assets_server
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - ./assets/processed:/usr/share/nginx/html:ro
+    networks:
+      - automation_net
+
+  # ---------------------------------------------------------------------------
+  # 5) CLOUDFLARE TUNNEL - expõe o n8n publicamente (HTTPS) via trycloudflare
+  # ---------------------------------------------------------------------------
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared_tunnel
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "--url", "http://n8n:5678"]
+    depends_on:
+      - n8n
+    networks:
+      - automation_net

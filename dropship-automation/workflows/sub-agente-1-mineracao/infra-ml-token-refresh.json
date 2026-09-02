@@ -1,0 +1,155 @@
+{
+  "name": "Cron - Refresh Token Mercado Livre (Redis)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "A cada 5 horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "ml_auth_tokens"
+      },
+      "id": "redis-get-tokens",
+      "name": "Redis: Buscar Token Atual",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-220, 300],
+      "options": {
+        "neverError": true
+      }
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// CORREÇÃO (auditoria v2.1): os valores de client_id, client_secret e\n// refresh_token NÃO têm mais fallback hardcoded. Se as variáveis de\n// ambiente não estiverem configuradas, o node falha explicitamente em vez\n// de tentar autenticar com credenciais antigas/expostas.\n//\n// O refresh_token do .env (MERCADO_LIVRE_REFRESH_TOKEN) só é usado na\n// PRIMEIRA execução, antes de existir qualquer valor salvo no Redis. Nas\n// execuções seguintes, o token mais recente (salvo pela última rodada\n// deste próprio workflow) tem prioridade.\nlet storedData = {};\ntry {\n  if ($json.data) {\n    storedData = JSON.parse($json.data);\n  }\n} catch (e) {\n  // JSON inválido no Redis é tratado como \"sem dado salvo\" — segue com env.\n}\n\nconst clientId = $env.MERCADO_LIVRE_CLIENT_ID;\nconst clientSecret = $env.MERCADO_LIVRE_CLIENT_SECRET;\nconst refreshToken = storedData.refresh_token || $env.MERCADO_LIVRE_REFRESH_TOKEN;\n\nif (!clientId || !clientSecret || !refreshToken) {\n  throw new Error(\n    'Credenciais do Mercado Livre ausentes. Configure MERCADO_LIVRE_CLIENT_ID, ' +\n    'MERCADO_LIVRE_CLIENT_SECRET e MERCADO_LIVRE_REFRESH_TOKEN no .env (a última ' +\n    'apenas para a primeira execução).'\n  );\n}\n\nreturn [{\n  json: {\n    client_id: clientId,\n    client_secret: clientSecret,\n    refresh_token: refreshToken\n  }\n}];"
+      },
+      "id": "code-prepare-payload",
+      "name": "Preparar Payload OAuth",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [20, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mercadolibre.com/oauth/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "refresh_token"
+            },
+            {
+              "name": "client_id",
+              "value": "={{ $json.client_id }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $json.client_secret }}"
+            },
+            {
+              "name": "refresh_token",
+              "value": "={{ $json.refresh_token }}"
+            }
+          ]
+        },
+        "options": {
+          "response": { "response": { "neverError": true } }
+        }
+      },
+      "id": "http-refresh-ml",
+      "name": "HTTP: Refresh Token ML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.access_token }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ]
+        }
+      },
+      "id": "if-refresh-ok",
+      "name": "IF: Refresh Bem-Sucedido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [500, 300],
+      "notes": "CORREÇÃO CRÍTICA (auditoria v2.1): antes o resultado ia direto para o Redis, mesmo sem access_token (ex.: refresh_token revogado/expirado). Agora só gravamos se a resposta veio completa; caso contrário, alertamos via Telegram em vez de gravar um token inválido silenciosamente."
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "ml_auth_tokens",
+        "value": "={{ JSON.stringify({\n  access_token: $json.access_token,\n  refresh_token: $json.refresh_token,\n  expires_in: $json.expires_in,\n  user_id: $json.user_id,\n  updated_at: new Date().toISOString()\n}) }}",
+        "expire": true,
+        "ttl": "={{ Math.max(($json.expires_in || 21600) - 1800, 300) }}"
+      },
+      "id": "redis-set-tokens",
+      "name": "Redis: Salvar Novos Tokens",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [740, 200],
+      "notes": "CORREÇÃO: agora grava expires_in (antes ausente) e calcula o TTL dinamicamente a partir da resposta real da API, com 30min de margem de segurança, em vez de um valor fixo de 21600s hardcoded."
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ '⚠️ Falha ao renovar o token do Mercado Livre. HTTP status: ' + ($json.status || 'desconhecido') + '. Resposta: ' + JSON.stringify($json).slice(0, 500) + '. Verifique MERCADO_LIVRE_CLIENT_ID/SECRET e se o refresh_token ainda é válido.' }}"
+      },
+      "id": "telegram-alert-refresh-falhou",
+      "name": "Telegram: Alertar Falha no Refresh",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [740, 420],
+      "credentials": {
+        "telegramApi": { "id": "telegram_bot_credential", "name": "Telegram Bot" }
+      }
+    }
+  ],
+  "connections": {
+    "A cada 5 horas": {
+      "main": [[{ "node": "Redis: Buscar Token Atual", "type": "main", "index": 0 }]]
+    },
+    "Redis: Buscar Token Atual": {
+      "main": [[{ "node": "Preparar Payload OAuth", "type": "main", "index": 0 }]]
+    },
+    "Preparar Payload OAuth": {
+      "main": [[{ "node": "HTTP: Refresh Token ML", "type": "main", "index": 0 }]]
+    },
+    "HTTP: Refresh Token ML": {
+      "main": [[{ "node": "IF: Refresh Bem-Sucedido?", "type": "main", "index": 0 }]]
+    },
+    "IF: Refresh Bem-Sucedido?": {
+      "main": [
+        [{ "node": "Redis: Salvar Novos Tokens", "type": "main", "index": 0 }],
+        [{ "node": "Telegram: Alertar Falha no Refresh", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" }
+}

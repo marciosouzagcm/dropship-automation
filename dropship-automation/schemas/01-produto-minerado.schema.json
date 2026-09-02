@@ -1,0 +1,31 @@
+{
+  "$comment": "Payload de saída do Sub-Agente 1 (Mineração) -> entrada do worker (fila:jobs_mineracao). CORREÇÃO (auditoria v2.1): campo renomeado de job_id para product_id, para ficar consistente com o schema mestre em product_payload.schema.json e com o que o Sub-Agente 1 realmente gera desde a correção do product_id ausente.",
+  "product_id": "8f2a1c3d-91e4-4b2a-9c3d-1a2b3c4d5e6f",
+  "origem": "shopee",
+  "produto": {
+    "id_externo": "SHP-991827",
+    "titulo": "Suporte de Celular Magnético para Carro",
+    "url_produto": "https://shopee.com.br/produto/991827",
+    "preco": 39.90,
+    "moeda": "BRL",
+    "avaliacao_media": 4.8,
+    "total_avaliacoes": 1523,
+    "vendas_mes": 4210,
+    "ticket_medio_estimado": 39.90,
+    "categoria": "Acessórios Automotivos"
+  },
+  "tendencia": {
+    "fonte": "tiktok_creative_center",
+    "score_tendencia": 87,
+    "hashtags_relacionadas": ["#carrogadget", "#magnetico", "#acessoriocarro"]
+  },
+  "midia_referencia": [
+    {
+      "tipo": "video",
+      "url": "https://cdn.exemplo.com/raw/991827_ref1.mp4",
+      "duracao_segundos": 24
+    }
+  ],
+  "criado_em": "2026-07-24T13:45:00-03:00",
+  "status": "aguardando_edicao"
+}

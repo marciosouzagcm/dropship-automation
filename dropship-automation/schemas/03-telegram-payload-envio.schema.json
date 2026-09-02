@@ -1,0 +1,22 @@
+{
+  "$comment": "Corpo da requisição HTTP enviada pelo n8n ao endpoint sendVideo/sendMessage do Telegram Bot API. O callback_data carrega o product_id para rastrear a decisão humana. CORREÇÃO (auditoria v2.1): consistente com product_id (antes o exemplo usava um id solto sem relação com o schema mestre).",
+  "method": "sendVideo",
+  "chat_id": "{{ $env.TELEGRAM_CHAT_ID }}",
+  "video": "attach://preview.mp4",
+  "caption": "🛒 *Novo conteúdo pronto para revisão*\n\nProduto: Suporte de Celular Magnético\nHook gerado: \"Você está estacionando errado esse tempo todo...\"\nDuração: 30s\n\nAprovar publicação?",
+  "parse_mode": "Markdown",
+  "reply_markup": {
+    "inline_keyboard": [
+      [
+        {
+          "text": "✅ Aprovar",
+          "callback_data": "approve:8f2a1c3d-91e4-4b2a-9c3d-1a2b3c4d5e6f"
+        },
+        {
+          "text": "❌ Rejeitar",
+          "callback_data": "reject:8f2a1c3d-91e4-4b2a-9c3d-1a2b3c4d5e6f"
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+CREATE USER dbvoting IDENTIFIED BY password;
+
+GRANT CONNECT, RESOURCE TO dbvoting;
+
+ALTER SESSION SET CURRENT_SCHEMA = dbvoting;
+
+CREATE TABLE IF NOT EXISTS autorizarEleitor (
+    login BIGINT PRIMARY KEY,
+    senha FLOAT,
+    nome VARCHAR(255)
+);

@@ -1,0 +1,183 @@
+{
+  "name": "Sub-Agente 2 - Aprovacao via Telegram (Oficial)",
+  "notes": "CORREÇÕES (auditoria v2.1): (1) os dois nós Telegram não tinham credencial configurada — o workflow falhava sempre; (2) qualquer job sem vídeo era tratado como ERRO e nunca gerava botões de aprovação, travando o job para sempre — agora distinguimos 'erro real de pipeline' (campo approval.status=ERROR, vindo do worker) de 'sem vídeo mas conteúdo válido' (envia por texto, com os mesmos botões); (3) o mock de teste usava nomes de campo com ponto que dependiam de 'dot notation' no node Set — trocado por um node Code que monta o objeto aninhado de forma explícita; (4) webhook agora exige o header x-webhook-secret.",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-manual-2",
+      "name": "Ao Clicar em Executar",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-200, 120]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// CORREÇÃO (auditoria v2.1): o mock anterior usava um node Set com chaves\n// como \"copywriting.telegram_post\" esperando que o n8n as transformasse\n// em objeto aninhado (comportamento de \"dot notation\", que depende de uma\n// opção nem sempre ativada). Um node Code com o objeto já aninhado\n// explicitamente elimina essa ambiguidade e garante que o teste manual\n// reflita fielmente o payload real enviado pelo worker.\nreturn [{\n  json: {\n    product_id: 'job_teste_123',\n    title: 'Escova de Limpeza Elétrica Multifuncional',\n    price: { promotional: 69.90, original: 79.90, currency: 'BRL' },\n    copywriting: { telegram_post: 'Você ainda perde horas esfregando o azulejo do banheiro?' },\n    media: { rendered_video_path: '' },\n    approval: { status: 'PENDING', approved_at: null }\n  }\n}];"
+      },
+      "id": "mock-test-sub2",
+      "name": "Dados de Teste Manual",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [40, 120]
+    },
+    {
+      "id": "webhook-aguardando-aprovacao",
+      "name": "Webhook: Conteúdo Pronto (do Worker)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-200, 300],
+      "parameters": {
+        "path": "conteudo-pronto-aprovacao",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      }
+    },
+    {
+      "id": "code-montar-legenda",
+      "name": "Montar Legenda de Aprovação",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [40, 300],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// CORREÇÃO (auditoria v2.1): validação do header x-webhook-secret — ver\n// worker/worker.py::_notificar_aprovacao, que é quem chama este webhook.\nconst vindoDeWebhook = $json.headers !== undefined;\nconst secretEsperado = $env.WEBHOOK_SHARED_SECRET;\nif (vindoDeWebhook && secretEsperado) {\n  const secretRecebido = $json.headers['x-webhook-secret'];\n  if (secretRecebido !== secretEsperado) {\n    throw new Error('Webhook não autorizado: header x-webhook-secret ausente ou incorreto.');\n  }\n}\n\nconst body = $json.body || $json || {};\nconst titulo = body?.title || 'Produto sem título';\nconst hook = body?.copywriting?.telegram_post || '(sem hook gerado)';\nconst preco = body?.price?.promotional ?? body?.price?.original ?? 0;\nconst jobId = body?.product_id || 'sem_id';\nconst videoPath = body?.media?.rendered_video_path || '';\n// CORREÇÃO: distingue erro real de pipeline (definido pelo worker em\n// approval.status === 'ERROR') de \"apenas sem vídeo\", que não é uma falha\n// e não deveria bloquear a aprovação do conteúdo.\nconst erroPipeline = body?.approval?.status === 'ERROR';\nconst motivoErro = body?.erro || 'motivo não informado';\n\nconst caption = `🛒 *Novo conteúdo pronto para revisão*\\n\\n` +\n  `Produto: ${titulo}\\n` +\n  `Preço: R$ ${Number(preco).toFixed(2)}\\n` +\n  `Hook: \"${hook}\"\\n\\n` +\n  `Aprovar publicação?`;\n\nconst replyMarkup = JSON.stringify({\n  inline_keyboard: [[\n    { text: '✅ Aprovar', callback_data: 'approve:' + jobId },\n    { text: '❌ Rejeitar', callback_data: 'reject:' + jobId }\n  ]]\n});\n\nreturn [{\n  json: { ...body, job_id: jobId, caption, videoPath, erroPipeline, motivoErro, replyMarkup }\n}];"
+      }
+    },
+    {
+      "id": "switch-estado-conteudo",
+      "name": "Switch: Estado do Conteúdo",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [280, 300],
+      "notes": "CORREÇÃO (auditoria v2.1): antes era um IF binário (\"tem vídeo\" / trata tudo mais como erro). Agora são 3 estados: erro real de pipeline, tem vídeo, ou não tem vídeo mas o conteúdo é válido (ex.: só imagem/texto) — este último agora também chega a gerar os botões de aprovação, em vez de ficar travado para sempre.",
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": { "conditions": [{ "leftValue": "={{ $json.erroPipeline }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }] },
+              "outputKey": "erro"
+            },
+            {
+              "conditions": { "conditions": [{ "leftValue": "={{ $json.videoPath }}", "rightValue": "", "operator": { "type": "string", "operation": "notEquals" } }] },
+              "outputKey": "com_video"
+            }
+          ]
+        },
+        "fallbackOutput": "sem_video"
+      }
+    },
+    {
+      "id": "readfile-video",
+      "name": "Ler Arquivo de Vídeo",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [520, 140],
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "={{ $json.videoPath }}"
+      },
+      "onError": "continueErrorOutput",
+      "notes": "CORREÇÃO: onError agora encaminha para o alerta de falha em vez de derrubar a execução silenciosamente (ex.: worker e n8n em containers sem volume de mídia compartilhado corretamente)."
+    },
+    {
+      "id": "telegram-send-video",
+      "name": "Telegram: Enviar Vídeo + Botões",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [760, 140],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendVideo",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "={{ $json.caption }}",
+          "parse_mode": "Markdown",
+          "reply_markup": "={{ $json.replyMarkup }}"
+        }
+      },
+      "credentials": {
+        "telegramApi": { "id": "telegram_bot_credential", "name": "Telegram Bot" }
+      },
+      "notes": "CORREÇÃO CRÍTICA: credencial do Telegram estava ausente — o node falhava sempre em runtime."
+    },
+    {
+      "id": "telegram-send-texto-sem-video",
+      "name": "Telegram: Enviar Texto + Botões (sem vídeo)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [520, 300],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.caption }}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "reply_markup": "={{ $json.replyMarkup }}"
+        }
+      },
+      "credentials": {
+        "telegramApi": { "id": "telegram_bot_credential", "name": "Telegram Bot" }
+      },
+      "notes": "NOVO (auditoria v2.1): antes, qualquer job sem vídeo caía direto no alerta de erro e nunca era aprovável. Agora conteúdo sem vídeo (ex.: apenas imagem/texto) ainda pode ser aprovado/rejeitado normalmente."
+    },
+    {
+      "id": "telegram-send-erro",
+      "name": "Telegram: Alertar Erro de Pipeline",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [520, 460],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ '⚠️ Falha no pipeline para o produto ' + ($json.title || $json.job_id || 'desconhecido') + '. Motivo: ' + $json.motivoErro + '. Verifique os logs do container media_processor.' }}"
+      },
+      "credentials": {
+        "telegramApi": { "id": "telegram_bot_credential", "name": "Telegram Bot" }
+      },
+      "notes": "CORREÇÃO CRÍTICA: credencial do Telegram estava ausente — o node falhava sempre em runtime."
+    },
+    {
+      "id": "telegram-send-erro-leitura-video",
+      "name": "Telegram: Alertar Falha ao Ler Vídeo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [760, 300],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ '⚠️ Vídeo renderizado não pôde ser lido para o produto ' + ($json.title || $json.job_id || 'desconhecido') + ' (caminho: ' + $json.videoPath + '). Verifique se o volume de assets está corretamente compartilhado entre n8n e media_processor.' }}"
+      },
+      "credentials": {
+        "telegramApi": { "id": "telegram_bot_credential", "name": "Telegram Bot" }
+      },
+      "notes": "NOVO (auditoria v2.1): antes, uma falha de leitura do arquivo (path existe no payload mas não é acessível pelo n8n) derrubava a execução sem avisar ninguém."
+    }
+  ],
+  "connections": {
+    "Ao Clicar em Executar": { "main": [[{ "node": "Dados de Teste Manual", "type": "main", "index": 0 }]] },
+    "Dados de Teste Manual": { "main": [[{ "node": "Montar Legenda de Aprovação", "type": "main", "index": 0 }]] },
+    "Webhook: Conteúdo Pronto (do Worker)": { "main": [[{ "node": "Montar Legenda de Aprovação", "type": "main", "index": 0 }]] },
+    "Montar Legenda de Aprovação": { "main": [[{ "node": "Switch: Estado do Conteúdo", "type": "main", "index": 0 }]] },
+    "Switch: Estado do Conteúdo": {
+      "main": [
+        [{ "node": "Telegram: Alertar Erro de Pipeline", "type": "main", "index": 0 }],
+        [{ "node": "Ler Arquivo de Vídeo", "type": "main", "index": 0 }],
+        [{ "node": "Telegram: Enviar Texto + Botões (sem vídeo)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Ler Arquivo de Vídeo": {
+      "main": [
+        [{ "node": "Telegram: Enviar Vídeo + Botões", "type": "main", "index": 0 }],
+        [{ "node": "Telegram: Alertar Falha ao Ler Vídeo", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "sub-agente-2-edicao-oficial"
+}

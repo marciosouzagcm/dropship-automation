@@ -1,0 +1,172 @@
+{
+  "name": "Sub-Agente 3 - Callback Telegram e Distribuicao (Oficial)",
+  "notes": "CORREÇÕES (auditoria v2.1): (1) a saída 'extra' do Switch (callback_data fora do padrão approve:/reject:) não estava conectada a nada — dados desapareciam silenciosamente; agora vai para um alerta; (2) a auditoria de rejeição só existia como console.log (não durável) e não havia equivalente para aprovação — agora ambos gravam em fila:auditoria no Redis; (3) valida o secret_token do Telegram (X-Telegram-Bot-Api-Secret-Token) para confirmar que o callback realmente veio do Telegram.\n\nCORREÇÃO (v2.2): o node 'Telegram: Confirmar Aprovação/Rejeição' rodava DEPOIS das gravações no Redis. Callback queries do Telegram expiram (erro 'query is too old and response timeout expired or query ID is invalid') se demorarem para ser respondidas — então agora respondemos ao Telegram primeiro e gravamos no Redis depois. Além disso, os dois nós de resposta ao Telegram têm onError=continueRegularOutput: se o callback_query_id for inválido/expirado (ex.: ao testar com o node de dados mock, que usa um ID falso — Telegram sempre rejeita isso, é esperado), a gravação de auditoria no Redis não é perdida por causa disso.",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-manual-3",
+      "name": "Ao Clicar em Executar",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-200, 120]
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "return [{\n  json: {\n    callback_query: {\n      data: 'approve:job_teste_123',\n      id: 'cb_query_mock_999',\n      from: { username: 'marciosouza' },\n      message: { chat: { id: '123456789' } }\n    }\n  }\n}];"
+      },
+      "id": "mock-test-sub3",
+      "name": "Dados de Teste Manual",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [40, 120],
+      "notes": "IMPORTANTE: o callback_query.id acima é inventado (\"cb_query_mock_999\"). O Telegram SEMPRE rejeita um ID que ele mesmo não emitiu — rodar este teste manual vai produzir o erro 'query is too old ... or query ID is invalid' no node Telegram: Confirmar Aprovação. Isso é esperado e não indica um problema no workflow: use este mock para validar o parsing e a gravação no Redis; para validar a resposta ao Telegram de fato, teste com um callback real (tocando no botão de um post enviado pelo Sub-Agente 2)."
+    },
+    {
+      "id": "webhook-telegram-callback",
+      "name": "Webhook: Telegram Callback",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-200, 300],
+      "parameters": {
+        "path": "telegram-callback",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      }
+    },
+    {
+      "id": "code-parse-seguro",
+      "name": "Parse Seguro do Callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [40, 300],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// CORREÇÃO (auditoria v2.1): valida que a chamada realmente veio do\n// Telegram usando o secret_token configurado via setWebhook (ver\n// scripts/bash/setup-telegram-webhook.sh). O Telegram reenvia esse valor\n// no header X-Telegram-Bot-Api-Secret-Token em toda chamada de callback.\nconst vindoDeWebhook = $json.headers !== undefined;\nconst secretEsperado = $env.TELEGRAM_WEBHOOK_SECRET_TOKEN;\nif (vindoDeWebhook && secretEsperado) {\n  const secretRecebido = $json.headers['x-telegram-bot-api-secret-token'];\n  if (secretRecebido !== secretEsperado) {\n    throw new Error('Callback não autorizado: secret_token do Telegram ausente ou incorreto.');\n  }\n}\n\nconst body = $json.body || $json || {};\n\nconst rawData = (body.callback_query?.data || body.message?.text || '').toString();\nconst [acao, jobId] = rawData.includes(':') ? rawData.split(':') : ['', ''];\n\nconst chatId = body.callback_query?.message?.chat?.id\n  || body.message?.chat?.id\n  || '';\nconst callbackQueryId = body.callback_query?.id || '';\nconst usuario = body.callback_query?.from?.username\n  || body.message?.from?.username\n  || 'desconhecido';\n\nreturn [{\n  json: {\n    acao: acao.trim(),\n    job_id: jobId.trim(),\n    raw_data: rawData,\n    chat_id: chatId,\n    callback_query_id: callbackQueryId,\n    aprovado_por: usuario,\n    aprovado_em: new Date().toISOString()\n  }\n}];"
+      }
+    },
+    {
+      "id": "switch-acao",
+      "name": "Switch: Ação do Callback",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [280, 300],
+      "parameters": {
+        "rules": {
+          "values": [
+            { "conditions": { "conditions": [{ "leftValue": "={{ $json.acao }}", "rightValue": "approve", "operator": { "type": "string", "operation": "equals" } }] }, "outputKey": "approve" },
+            { "conditions": { "conditions": [{ "leftValue": "={{ $json.acao }}", "rightValue": "reject", "operator": { "type": "string", "operation": "equals" } }] }, "outputKey": "reject" }
+          ]
+        },
+        "fallbackOutput": "extra"
+      }
+    },
+    {
+      "id": "telegram-confirmar-aprovacao",
+      "name": "Telegram: Confirmar Aprovação",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [520, 100],
+      "parameters": {
+        "resource": "callback",
+        "operation": "answerQuery",
+        "queryId": "={{ $json.callback_query_id }}",
+        "text": "✅ Aprovado! Publicando nos canais configurados..."
+      },
+      "credentials": { "telegramApi": { "id": "telegram_bot_credential", "name": "Telegram Bot" } },
+      "onError": "continueRegularOutput",
+      "notes": "CORREÇÃO (v2.2): movido para ANTES das gravações no Redis (responder rápido evita o erro 'query is too old'). onError=continueRegularOutput garante que, mesmo se o callback_query_id for inválido/expirado (comum ao testar com o mock manual), a gravação de auditoria abaixo ainda aconteça."
+    },
+    {
+      "id": "redis-push-aprovados",
+      "name": "Redis: Push fila:aprovados",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [760, 100],
+      "parameters": {
+        "operation": "push",
+        "list": "fila:aprovados",
+        "messageData": "={{ JSON.stringify({ product_id: $json.job_id, approval: { status: 'APPROVED', approved_at: $json.aprovado_em, approved_by: $json.aprovado_por } }) }}",
+        "tail": false
+      }
+    },
+    {
+      "id": "redis-log-auditoria-aprovacao",
+      "name": "Redis: Log Auditoria (aprovação)",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1000, 100],
+      "parameters": {
+        "operation": "push",
+        "list": "fila:auditoria",
+        "messageData": "={{ JSON.stringify({ product_id: $json.job_id, acao: 'approve', por: $json.aprovado_por, em: $json.aprovado_em }) }}",
+        "tail": false
+      },
+      "notes": "NOVO (auditoria v2.1): antes só a rejeição tinha algum registro (e mesmo assim só em console.log, não durável). Agora aprovação e rejeição usam a mesma estrutura de auditoria persistida no Redis."
+    },
+    {
+      "id": "telegram-confirmar-rejeicao",
+      "name": "Telegram: Confirmar Rejeição",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [520, 320],
+      "parameters": {
+        "resource": "callback",
+        "operation": "answerQuery",
+        "queryId": "={{ $json.callback_query_id }}",
+        "text": "❌ Conteúdo rejeitado. Nenhuma publicação será feita."
+      },
+      "credentials": { "telegramApi": { "id": "telegram_bot_credential", "name": "Telegram Bot" } },
+      "onError": "continueRegularOutput",
+      "notes": "CORREÇÃO (v2.2): mesma correção de ordem/robustez do node de aprovação, ver acima."
+    },
+    {
+      "id": "redis-log-auditoria-rejeicao",
+      "name": "Redis: Log Auditoria (rejeição)",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [760, 320],
+      "parameters": {
+        "operation": "push",
+        "list": "fila:auditoria",
+        "messageData": "={{ JSON.stringify({ product_id: $json.job_id, acao: 'reject', por: $json.aprovado_por, em: $json.aprovado_em }) }}",
+        "tail": false
+      },
+      "notes": "CORREÇÃO: antes era apenas console.log (não durável, perdido quando o histórico de execuções é limpo). Substituído por um registro persistente no Redis, na mesma estrutura usada para aprovações."
+    },
+    {
+      "id": "telegram-alertar-callback-desconhecido",
+      "name": "Telegram: Alertar Callback Desconhecido",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [520, 520],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ '⚠️ Callback do Telegram com ação não reconhecida: \"' + $json.raw_data + '\" (esperado approve:<id> ou reject:<id>). Verifique se não é uma tentativa de manipulação externa.' }}"
+      },
+      "credentials": { "telegramApi": { "id": "telegram_bot_credential", "name": "Telegram Bot" } },
+      "notes": "NOVO (auditoria v2.1): antes, a saída 'extra' do Switch não estava conectada a nada — qualquer callback fora do padrão approve:/reject: desaparecia silenciosamente, sem log nem alerta."
+    }
+  ],
+  "connections": {
+    "Ao Clicar em Executar": { "main": [[{ "node": "Dados de Teste Manual", "type": "main", "index": 0 }]] },
+    "Dados de Teste Manual": { "main": [[{ "node": "Parse Seguro do Callback", "type": "main", "index": 0 }]] },
+    "Webhook: Telegram Callback": { "main": [[{ "node": "Parse Seguro do Callback", "type": "main", "index": 0 }]] },
+    "Parse Seguro do Callback": { "main": [[{ "node": "Switch: Ação do Callback", "type": "main", "index": 0 }]] },
+    "Switch: Ação do Callback": {
+      "main": [
+        [{ "node": "Telegram: Confirmar Aprovação", "type": "main", "index": 0 }],
+        [{ "node": "Telegram: Confirmar Rejeição", "type": "main", "index": 0 }],
+        [{ "node": "Telegram: Alertar Callback Desconhecido", "type": "main", "index": 0 }]
+      ]
+    },
+    "Telegram: Confirmar Aprovação": { "main": [[{ "node": "Redis: Push fila:aprovados", "type": "main", "index": 0 }]] },
+    "Redis: Push fila:aprovados": { "main": [[{ "node": "Redis: Log Auditoria (aprovação)", "type": "main", "index": 0 }]] },
+    "Telegram: Confirmar Rejeição": { "main": [[{ "node": "Redis: Log Auditoria (rejeição)", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "sub-agente-3-distribuicao-oficial"
+}

@@ -1,0 +1,502 @@
+Listagem de caminhos de pasta
+O número de série do volume é DE37-0691
+C:.
+|   .gitattributes
+|   .gitignore
+|   estrutura_projeto.txt
+|   HELP.md
+|   mvnw
+|   mvnw.cmd
+|   package.json
+|   pom.xml
+|   
++---.mvn
+|   \---wrapper
+|           maven-wrapper.properties
+|           
++---.vscode
+|       settings.json
+|       
++---BOOT-INF
+|   |   classpath.idx
+|   |   layers.idx
+|   |   
+|   +---classes
+|   |   |   application.properties
+|   |   |   
+|   |   +---blockchain
+|   |   |   \---api_java_smart_contracts
+|   |   |       |   Candidato.class
+|   |   |       |   DeployContract.class
+|   |   |       |   Web3jConfig.class
+|   |   |       |   
+|   |   |       +---controller
+|   |   |       |       CandidatoController.class
+|   |   |       |       RequestController.class
+|   |   |       |       
+|   |   |       \---service
+|   |   |               CandidatoService.class
+|   |   |               VotingService.class
+|   |   |               
+|   |   +---com
+|   |   |   \---votacao
+|   |   |       \---api
+|   |   |               ApiJavaSmartContractsApplication.class
+|   |   |               CandidatoException.class
+|   |   |               CandidatoNotFoundException.class
+|   |   |               EleitorException.class
+|   |   |               VotingContract$1.class
+|   |   |               VotingContract$2.class
+|   |   |               VotingContract$3.class
+|   |   |               VotingContract$Candidato.class
+|   |   |               VotingContract.class
+|   |   |               VotingController.class
+|   |   |               VotingException.class
+|   |   |               Web3jConfig.class
+|   |   |               
+|   |   \---conexao
+|   |           Conexao.class
+|   |           
+|   \---lib
+|           abi-4.8.7.jar
+|           angus-activation-2.0.2.jar
+|           annotations-13.0.jar
+|           antlr4-runtime-4.13.0.jar
+|           asm-9.7.1.jar
+|           asm-analysis-5.0.3.jar
+|           asm-commons-5.0.3.jar
+|           asm-tree-5.0.3.jar
+|           asm-util-5.0.3.jar
+|           aspectjweaver-1.9.23.jar
+|           bcprov-jdk15on-1.68.jar
+|           byte-buddy-1.15.11.jar
+|           classmate-1.7.0.jar
+|           core-4.8.7.jar
+|           crypto-4.8.7.jar
+|           hibernate-commons-annotations-7.0.3.Final.jar
+|           hibernate-core-6.6.11.Final.jar
+|           HikariCP-5.1.0.jar
+|           istack-commons-runtime-4.1.2.jar
+|           jackson-annotations-2.18.3.jar
+|           jackson-core-2.18.3.jar
+|           jackson-databind-2.18.3.jar
+|           jakarta.activation-api-2.1.3.jar
+|           jakarta.annotation-api-2.1.1.jar
+|           jakarta.inject-api-2.0.1.jar
+|           jakarta.persistence-api-3.1.0.jar
+|           jakarta.transaction-api-2.0.1.jar
+|           jakarta.xml.bind-api-4.0.2.jar
+|           jandex-3.2.0.jar
+|           Java-WebSocket-1.3.8.jar
+|           javax.persistence-api-2.2.jar
+|           jaxb-core-4.0.5.jar
+|           jaxb-runtime-4.0.5.jar
+|           jboss-logging-3.6.1.Final.jar
+|           jffi-1.2.16-native.jar
+|           jffi-1.2.17.jar
+|           jnr-a64asm-1.0.0.jar
+|           jnr-constants-0.9.11.jar
+|           jnr-enxio-0.19.jar
+|           jnr-ffi-2.1.9.jar
+|           jnr-posix-3.0.47.jar
+|           jnr-unixsocket-0.21.jar
+|           jnr-x86asm-1.0.2.jar
+|           jul-to-slf4j-2.0.17.jar
+|           kotlin-stdlib-1.9.25.jar
+|           kotlin-stdlib-common-1.9.25.jar
+|           kotlin-stdlib-jdk7-1.9.25.jar
+|           kotlin-stdlib-jdk8-1.9.25.jar
+|           log4j-api-2.24.3.jar
+|           log4j-to-slf4j-2.24.3.jar
+|           logback-classic-1.5.18.jar
+|           logback-core-1.5.18.jar
+|           logging-interceptor-4.9.0.jar
+|           micrometer-commons-1.14.5.jar
+|           micrometer-observation-1.14.5.jar
+|           mysql-connector-j-8.0.33.jar
+|           okhttp-4.9.0.jar
+|           okio-2.8.0.jar
+|           reactive-streams-1.0.4.jar
+|           rlp-4.8.7.jar
+|           rxjava-2.2.2.jar
+|           slf4j-api-2.0.17.jar
+|           snakeyaml-2.3.jar
+|           spring-aop-6.2.5.jar
+|           spring-aspects-6.2.5.jar
+|           spring-beans-6.2.5.jar
+|           spring-boot-3.4.4.jar
+|           spring-boot-autoconfigure-3.4.4.jar
+|           spring-boot-jarmode-tools-3.4.4.jar
+|           spring-context-6.2.5.jar
+|           spring-core-6.2.5.jar
+|           spring-data-commons-3.4.4.jar
+|           spring-data-jpa-3.4.4.jar
+|           spring-expression-6.2.5.jar
+|           spring-jcl-6.2.5.jar
+|           spring-jdbc-6.2.5.jar
+|           spring-orm-6.2.5.jar
+|           spring-tx-6.2.5.jar
+|           spring-web-6.2.5.jar
+|           spring-webmvc-6.2.5.jar
+|           tuples-4.8.7.jar
+|           txw2-4.0.5.jar
+|           utils-4.8.7.jar
+|           
++---logs
+|   |   api-java-smart-contracts.log
+|   |   api-java-smart-contracts.log.2025-04-22.0.gz
+|   |   api-java-smart-contracts.log.2025-04-23.0.gz
+|   |   
+|   \---dbVoting
+|           autorizarEleitor.sql
+|           
++---META-INF
+|   |   BOOT.SF
+|   |   MANIFEST.MF
+|   |   
+|   +---maven
+|   |   \---blockchain
+|   |       \---api-java-smart-contracts
+|   |               pom.properties
+|   |               pom.xml
+|   |               
+|   \---services
+|           java.nio.file.spi.FileSystemProvider
+|           
++---org
+|   \---springframework
+|       \---boot
+|           \---loader
+|               +---jar
+|               |       JarEntriesStream$InputStreamSupplier.class
+|               |       JarEntriesStream.class
+|               |       ManifestInfo.class
+|               |       MetaInfVersionsInfo.class
+|               |       NestedJarFile$JarEntriesEnumeration.class
+|               |       NestedJarFile$JarEntryInflaterInputStream.class
+|               |       NestedJarFile$JarEntryInputStream.class
+|               |       NestedJarFile$NestedJarEntry.class
+|               |       NestedJarFile$RawZipDataInputStream.class
+|               |       NestedJarFile$ZipContentEntriesSpliterator.class
+|               |       NestedJarFile.class
+|               |       NestedJarFileResources.class
+|               |       SecurityInfo.class
+|               |       ZipInflaterInputStream.class
+|               |       
+|               +---jarmode
+|               |       JarMode.class
+|               |       JarModeErrorException.class
+|               |       
+|               +---launch
+|               |       Archive$Entry.class
+|               |       Archive.class
+|               |       ClassPathIndexFile.class
+|               |       ExecutableArchiveLauncher.class
+|               |       ExplodedArchive$FileArchiveEntry.class
+|               |       ExplodedArchive.class
+|               |       JarFileArchive$JarArchiveEntry.class
+|               |       JarFileArchive.class
+|               |       JarLauncher.class
+|               |       JarModeRunner.class
+|               |       LaunchedClassLoader$DefinePackageCallType.class
+|               |       LaunchedClassLoader.class
+|               |       Launcher.class
+|               |       PropertiesLauncher$Instantiator$Using.class
+|               |       PropertiesLauncher$Instantiator.class
+|               |       PropertiesLauncher.class
+|               |       SystemPropertyUtils.class
+|               |       WarLauncher.class
+|               |       
+|               +---log
+|               |       DebugLogger$DisabledDebugLogger.class
+|               |       DebugLogger$SystemErrDebugLogger.class
+|               |       DebugLogger.class
+|               |       
+|               +---net
+|               |   +---protocol
+|               |   |   |   Handlers.class
+|               |   |   |   
+|               |   |   +---jar
+|               |   |   |       Canonicalizer.class
+|               |   |   |       Handler.class
+|               |   |   |       JarFileUrlKey.class
+|               |   |   |       JarUrl.class
+|               |   |   |       JarUrlClassLoader$OptimizedEnumeration.class
+|               |   |   |       JarUrlClassLoader.class
+|               |   |   |       JarUrlConnection$ConnectionInputStream.class
+|               |   |   |       JarUrlConnection$EmptyUrlStreamHandler.class
+|               |   |   |       JarUrlConnection.class
+|               |   |   |       LazyDelegatingInputStream.class
+|               |   |   |       Optimizations.class
+|               |   |   |       UrlJarEntry.class
+|               |   |   |       UrlJarFile.class
+|               |   |   |       UrlJarFileFactory.class
+|               |   |   |       UrlJarFiles$Cache.class
+|               |   |   |       UrlJarFiles.class
+|               |   |   |       UrlJarManifest$ManifestSupplier.class
+|               |   |   |       UrlJarManifest.class
+|               |   |   |       UrlNestedJarFile.class
+|               |   |   |       
+|               |   |   \---nested
+|               |   |           Handler.class
+|               |   |           NestedLocation.class
+|               |   |           NestedUrlConnection$ConnectionInputStream.class
+|               |   |           NestedUrlConnection.class
+|               |   |           NestedUrlConnectionResources.class
+|               |   |           
+|               |   \---util
+|               |           UrlDecoder.class
+|               |           
+|               +---nio
+|               |   \---file
+|               |           NestedByteChannel$Resources.class
+|               |           NestedByteChannel.class
+|               |           NestedFileStore.class
+|               |           NestedFileSystem.class
+|               |           NestedFileSystemProvider.class
+|               |           NestedPath.class
+|               |           UriPathEncoder.class
+|               |           
+|               +---ref
+|               |       Cleaner.class
+|               |       DefaultCleaner.class
+|               |       
+|               \---zip
+|                       ByteArrayDataBlock.class
+|                       CloseableDataBlock.class
+|                       DataBlock.class
+|                       DataBlockInputStream.class
+|                       FileDataBlock$FileAccess.class
+|                       FileDataBlock$Tracker$1.class
+|                       FileDataBlock$Tracker.class
+|                       FileDataBlock.class
+|                       NameOffsetLookups.class
+|                       VirtualDataBlock.class
+|                       VirtualZipDataBlock$DataPart.class
+|                       VirtualZipDataBlock.class
+|                       Zip64EndOfCentralDirectoryLocator.class
+|                       Zip64EndOfCentralDirectoryRecord.class
+|                       ZipCentralDirectoryFileHeaderRecord.class
+|                       ZipContent$Entry.class
+|                       ZipContent$Kind.class
+|                       ZipContent$Loader.class
+|                       ZipContent$Source.class
+|                       ZipContent.class
+|                       ZipDataDescriptorRecord.class
+|                       ZipEndOfCentralDirectoryRecord$Located.class
+|                       ZipEndOfCentralDirectoryRecord.class
+|                       ZipLocalFileHeaderRecord.class
+|                       ZipString$CompareType.class
+|                       ZipString.class
+|                       
++---src
+|   +---ExplicaçãoGeral
+|   |       ContractConfig.md
+|   |       Web3jConfig.md
+|   |       
+|   +---main
+|   |   +---contracts
+|   |   |       .gitkeep
+|   |   |       contractVoting.sol
+|   |   |       
+|   |   +---java
+|   |   |   +---blockchain
+|   |   |   |   \---api_java_smart_contracts
+|   |   |   |       +---config
+|   |   |   |       |       ContractConfig.java
+|   |   |   |       |       Web3jConfig.java
+|   |   |   |       |       
+|   |   |   |       +---contracts
+|   |   |   |       |       Voting.java
+|   |   |   |       |       
+|   |   |   |       +---controller
+|   |   |   |       |       CandidatoController.java
+|   |   |   |       |       RequestController.java
+|   |   |   |       |       VotingController.java
+|   |   |   |       |       
+|   |   |   |       +---model
+|   |   |   |       |       adicionarCandidatoRequest.java
+|   |   |   |       |       Candidato.java
+|   |   |   |       |       
+|   |   |   |       +---repository
+|   |   |   |       \---service
+|   |   |   |               BlockchainService.java
+|   |   |   |               BlockchainServiceException.java
+|   |   |   |               CandidatoService.java
+|   |   |   |               CandidatoServiceException.java
+|   |   |   |               Voting.java
+|   |   |   |               VotingService.java
+|   |   |   |               
+|   |   |   +---com
+|   |   |   |   \---votacao
+|   |   |   |       \---api
+|   |   |   |           |   ApiJavaSmartContractsApplication.java
+|   |   |   |           |   
+|   |   |   |           \---exception
+|   |   |   |                   CandidatoException.java
+|   |   |   |                   CandidatoNotFoundException.java
+|   |   |   |                   EleitorException.java
+|   |   |   |                   VotingException.java
+|   |   |   |                   
+|   |   |   +---conexao
+|   |   |   |       Conexao.java
+|   |   |   |       mysql-connector-j-9.1.0.jar
+|   |   |   |       
+|   |   |   \---smart-contracts
+|   |   |       |   truffle-config.js
+|   |   |       |   
+|   |   |       +---build
+|   |   |       |   \---contracts
+|   |   |       |           Voting.json
+|   |   |       |           
+|   |   |       +---migrations
+|   |   |       |       .gitkeep
+|   |   |       |       2_deploy_voting_contract.js
+|   |   |       |       
+|   |   |       \---test
+|   |   |               .gitkeep
+|   |   |               
+|   |   \---resources
+|   |       |   application.properties
+|   |       |   contract-bytecode.txt
+|   |       |   
+|   |       +---abi
+|   |       |       Voting.json
+|   |       |       
+|   |       +---ganache-config
+|   |       \---META-INF
+|   |               additional-spring-configuration-metadata.json
+|   |               
+|   \---test
+|       |   application-test.properties
+|       |   
+|       \---java
+|           +---blockchain
+|           |   \---api_java_smart_contracts
+|           |           ApiJavaSmartContractsApplicationTests.java
+|           |           
+|           \---com
+|               \---votacao
+|                   \---api
+|                           ApiJavaSmartContractsApplicationTest.java
+|                           
+\---target
+    +---classes
+    |   |   application.properties
+    |   |   contract-bytecode.txt
+    |   |   
+    |   +---abi
+    |   |       Voting.json
+    |   |       
+    |   +---blockchain
+    |   |   \---api_java_smart_contracts
+    |   |       +---config
+    |   |       |       ContractConfig.class
+    |   |       |       Web3jConfig.class
+    |   |       |       
+    |   |       +---contracts
+    |   |       |       Voting$1.class
+    |   |       |       Voting$10.class
+    |   |       |       Voting$11.class
+    |   |       |       Voting$12.class
+    |   |       |       Voting$13.class
+    |   |       |       Voting$14.class
+    |   |       |       Voting$15.class
+    |   |       |       Voting$16.class
+    |   |       |       Voting$17.class
+    |   |       |       Voting$18.class
+    |   |       |       Voting$19.class
+    |   |       |       Voting$2.class
+    |   |       |       Voting$20.class
+    |   |       |       Voting$21.class
+    |   |       |       Voting$22.class
+    |   |       |       Voting$23.class
+    |   |       |       Voting$24.class
+    |   |       |       Voting$25.class
+    |   |       |       Voting$26.class
+    |   |       |       Voting$27.class
+    |   |       |       Voting$28.class
+    |   |       |       Voting$29.class
+    |   |       |       Voting$3.class
+    |   |       |       Voting$30.class
+    |   |       |       Voting$4.class
+    |   |       |       Voting$5.class
+    |   |       |       Voting$6.class
+    |   |       |       Voting$7.class
+    |   |       |       Voting$8.class
+    |   |       |       Voting$9.class
+    |   |       |       Voting$CandidatoAdicionadoEventResponse.class
+    |   |       |       Voting$EleitorAutorizadoEventResponse.class
+    |   |       |       Voting$VotoFalhouEventResponse.class
+    |   |       |       Voting$VotoRegistradoEventResponse.class
+    |   |       |       Voting.class
+    |   |       |       
+    |   |       +---controller
+    |   |       |       CandidatoController.class
+    |   |       |       RequestController.class
+    |   |       |       VotingController.class
+    |   |       |       
+    |   |       +---model
+    |   |       |       adicionarCandidatoRequest.class
+    |   |       |       Candidato.class
+    |   |       |       
+    |   |       \---service
+    |   |               BlockchainService.class
+    |   |               BlockchainServiceException.class
+    |   |               CandidatoService.class
+    |   |               CandidatoServiceException.class
+    |   |               Voting$1.class
+    |   |               Voting$2.class
+    |   |               Voting$3.class
+    |   |               Voting$4.class
+    |   |               Voting$5.class
+    |   |               Voting$6.class
+    |   |               Voting$Candidato.class
+    |   |               Voting.class
+    |   |               VotingService.class
+    |   |               
+    |   +---com
+    |   |   \---votacao
+    |   |       \---api
+    |   |           |   ApiJavaSmartContractsApplication.class
+    |   |           |   
+    |   |           \---exception
+    |   |                   CandidatoException.class
+    |   |                   CandidatoNotFoundException.class
+    |   |                   EleitorException.class
+    |   |                   VotingException.class
+    |   |                   
+    |   +---conexao
+    |   |       Conexao.class
+    |   |       
+    |   \---META-INF
+    |           additional-spring-configuration-metadata.json
+    |           
+    +---generated-sources
+    |   \---annotations
+    +---generated-test-sources
+    |   \---test-annotations
+    +---maven-status
+    |   \---maven-compiler-plugin
+    |       +---compile
+    |       |   \---default-compile
+    |       |           createdFiles.lst
+    |       |           inputFiles.lst
+    |       |           
+    |       \---testCompile
+    |           \---default-testCompile
+    |                   createdFiles.lst
+    |                   inputFiles.lst
+    |                   
+    \---test-classes
+        +---blockchain
+        |   \---api_java_smart_contracts
+        |           ApiJavaSmartContractsApplicationTests$ApiJavaSmartContractsApplication.class
+        |           ApiJavaSmartContractsApplicationTests.class
+        |           
+        \---com
+            \---votacao
+                \---api
+                        ApiJavaSmartContractsApplicationTest$ApiJavaSmartContractsApplication.class
+                        ApiJavaSmartContractsApplicationTest.class
+                        

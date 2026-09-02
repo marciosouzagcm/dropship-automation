@@ -1,0 +1,28 @@
+# CORREÇÃO (auditoria v2.1): existiam DOIS arquivos requirements.txt no
+# projeto (este e docker/python-ffmpeg/requirements.txt) com listas de
+# pacotes divergentes. O Dockerfile só copia e instala este aqui
+# (worker/requirements.txt) — o outro era um duplicado morto, removido
+# para evitar que alguém o edite pensando que ele tem efeito.
+#
+# Usa o índice CPU do PyTorch: evita baixar as variantes com CUDA, que são
+# muito maiores e desnecessárias neste projeto (Whisper roda em CPU aqui).
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# --- Processamento de vídeo/imagem/áudio/transcrição ---
+torch
+openai-whisper
+ffmpeg-python==0.2.0
+moviepy==1.0.3
+opencv-python-headless==4.10.0.84
+pillow==10.4.0
+numpy==1.26.4
+
+# --- Integrações e utilidades ---
+requests==2.32.3
+python-dotenv==1.0.1
+redis==5.0.8
+python-telegram-bot==21.4
+
+# --- APIs de IA (geração de scripts/hooks) ---
+google-generativeai==0.8.3
+anthropic==0.34.2

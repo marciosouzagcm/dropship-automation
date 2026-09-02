@@ -1,0 +1,24 @@
+{
+  "$comment": "Payload publicado na fila Redis 'fila:jobs_video' pelo n8n para o media-processor. CORREÇÃO (auditoria v2.1): campo renomeado de job_id para product_id.",
+  "product_id": "8f2a1c3d-91e4-4b2a-9c3d-1a2b3c4d5e6f",
+  "produto_ref": "SHP-991827",
+  "midia_entrada": {
+    "video_raw_path": "/data/assets/raw/991827_ref1.mp4"
+  },
+  "instrucoes_ia": {
+    "modelo": "gemini-2.5-pro",
+    "objetivo": "gerar_hook_inedito",
+    "tom": "informal_persuasivo",
+    "nicho": "gadgets_automotivos",
+    "duracao_alvo_segundos": 30
+  },
+  "edicao": {
+    "cortes_automaticos": true,
+    "adicionar_legenda": true,
+    "adicionar_marca_dagua": true,
+    "trilha_sonora": "upbeat_trend_01.mp3",
+    "template_visual": "templates/video/tiktok_vertical_v1.json"
+  },
+  "criado_em": "2026-07-24T13:47:00-03:00",
+  "status": "em_processamento"
+}
