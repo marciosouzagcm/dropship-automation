@@ -1,0 +1,112 @@
+{
+  "name": "Assistente de Investimentos - MVP (mensagens estáticas)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "clientes",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "n-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "clientes-rpa"
+    },
+    {
+      "parameters": {
+        "url": "http://docs/data.csv",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "n-csv",
+      "name": "Ler data.csv",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// N8N Code node (Run Once for All Items) — versão MVP com mensagens estáticas.\n// Entrada: resposta do HTTP Request com o conteúdo de data.csv (campo \"data\").\n// Os clientes vêm do nó Webhook (body.clientes).\n\nconst clientes = $('Webhook').first().json.body.clientes || [];\nconst csv = $input.first().json.data;\n\n// 1) Ler o CSV de investimentos\nconst [cabecalho, ...linhas] = csv.trim().split(/\\r?\\n/);\nconst colunas = cabecalho.split(',').map(c => c.trim());\nconst opcoes = linhas.filter(Boolean).map(l => {\n  const v = l.split(',');\n  const o = {};\n  colunas.forEach((c, i) => (o[c] = (v[i] || '').trim()));\n  o.minimo = Number(o.minimo);\n  return o;\n});\n\n// 2) Utilitários\nconst parseSaldo = s => Number(String(s).replace(/[^\\d,]/g, '').replace(',', '.'));\nconst brl = n => 'R$ ' + n.toFixed(2).replace('.', ',').replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n\nconst templates = {\n  Conservador: 'foco em segurança e liquidez, com renda fixa',\n  Moderado: 'mix equilibrado entre renda fixa e renda variável',\n  Arrojado: 'ênfase em ações e maior potencial de retorno, aceitando mais volatilidade',\n};\n\n// 3) Cruzar perfil x saldo e montar a mensagem\nreturn clientes.map(c => {\n  const saldo = parseSaldo(c.saldo);\n  const doPerfil = opcoes.filter(o => o.perfil === c.perfil);\n  const elegiveis = doPerfil.filter(o => o.minimo <= saldo);\n  const primeiroNome = c.nome.split(' ')[0];\n  const estrategia = templates[c.perfil] || 'diversificação adequada ao seu momento';\n\n  let mensagem;\n  if (elegiveis.length) {\n    const lista = elegiveis\n      .map(o => `${o.produto} (mín. ${brl(o.minimo)}, rentab. ${o.rentabilidade})`)\n      .join('; ');\n    mensagem =\n      `Olá, ${primeiroNome}! Com seu perfil ${c.perfil} e saldo de ${brl(saldo)}, ` +\n      `sugerimos uma estratégia com ${estrategia}. Opções disponíveis para você: ${lista}.`;\n  } else {\n    const menor = doPerfil.slice().sort((a, b) => a.minimo - b.minimo)[0];\n    mensagem =\n      `Olá, ${primeiroNome}! Seu perfil ${c.perfil} pede ${estrategia}. ` +\n      `Seu saldo atual (${brl(saldo)}) ainda está abaixo do mínimo das opções do perfil` +\n      (menor ? `; a mais acessível é ${menor.produto}, a partir de ${brl(menor.minimo)}.` : '.');\n  }\n\n  return {\n    json: {\n      nome: c.nome,\n      email: c.email,\n      perfil: c.perfil,\n      saldo,\n      opcoes_elegiveis: elegiveis.map(o => o.produto),\n      mensagem,\n    },\n  };\n});\n"
+      },
+      "id": "n-code",
+      "name": "Cruzar Perfil x Investimentos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "n-respond",
+      "name": "Responder ao Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Ler data.csv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler data.csv": {
+      "main": [
+        [
+          {
+            "node": "Cruzar Perfil x Investimentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cruzar Perfil x Investimentos": {
+      "main": [
+        [
+          {
+            "node": "Responder ao Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

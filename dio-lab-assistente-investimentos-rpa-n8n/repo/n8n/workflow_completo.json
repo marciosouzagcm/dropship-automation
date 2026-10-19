@@ -1,0 +1,381 @@
+{
+  "id": "WfCompleto0001aa",
+  "name": "Assistente de Investimentos - Completo (Merge + OpenAI + E-mail)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "clientes-completo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "clientes-completo-rpa"
+    },
+    {
+      "parameters": {
+        "url": "http://docs/data.csv",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "c-csv",
+      "name": "Ler data.csv",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// N8N Code node (Run Once for All Items) — normaliza os clientes recebidos no Webhook.\nconst clientes = $('Webhook').first().json.body.clientes || [];\n\nconst parseSaldo = s => Number(String(s).replace(/[^\\d,]/g, '').replace(',', '.')) || 0;\n\nreturn clientes.map(c => ({\n  json: {\n    nome: String(c.nome || '').trim(),\n    email: String(c.email || '').trim(),\n    perfil: String(c.perfil || '').trim(),\n    saldo: parseSaldo(c.saldo),\n  },\n}));\n"
+      },
+      "id": "c-clientes",
+      "name": "Code - Clientes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// N8N Code node (Run Once for All Items) — transforma o CSV de investimentos em itens.\nconst csv = $input.first().json.data || '';\n\nconst [cabecalho, ...linhas] = csv.trim().split(/\\r?\\n/);\nconst colunas = cabecalho.split(',').map(c => c.trim());\n\nreturn linhas.filter(Boolean).map(l => {\n  const v = l.split(',');\n  const o = {};\n  colunas.forEach((c, i) => (o[c] = (v[i] || '').trim()));\n  return {\n    json: {\n      perfil: o.perfil,\n      produto: o.produto,\n      minimo: Number(o.minimo),\n      rentabilidade: o.rentabilidade,\n    },\n  };\n});\n"
+      },
+      "id": "c-invest",
+      "name": "Code - Investimentos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByFields",
+        "fieldsToMatchString": "perfil",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "c-merge",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// N8N Code node (Run Once for All Items) — a saída do Merge tem uma linha por cliente x produto;\n// aqui ela vira uma linha por cliente, com a tabela de opções e o prompt para o modelo.\nconst brl = n =>\n  'R$ ' + Number(n).toFixed(2).replace('.', ',').replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n\nconst grupos = new Map();\nfor (const { json: r } of $input.all()) {\n  const chave = `${r.email}|${r.nome}`;\n  if (!grupos.has(chave)) {\n    grupos.set(chave, { nome: r.nome, email: r.email, perfil: r.perfil, saldo: r.saldo, opcoes: [] });\n  }\n  if (r.produto) {\n    grupos.get(chave).opcoes.push({\n      produto: r.produto,\n      minimo: Number(r.minimo),\n      rentabilidade: r.rentabilidade,\n    });\n  }\n}\n\nreturn [...grupos.values()].map(g => {\n  const elegiveis = g.opcoes.filter(o => o.minimo <= g.saldo);\n  const primeiroNome = g.nome.split(' ')[0];\n\n  const tabela = [\n    '| Produto | Mínimo | Rentabilidade | Elegível |',\n    '| --- | --- | --- | --- |',\n    ...g.opcoes.map(\n      o => `| ${o.produto} | ${brl(o.minimo)} | ${o.rentabilidade} | ${o.minimo <= g.saldo ? 'Sim' : 'Não'} |`\n    ),\n  ].join('\\n');\n\n  const prompt =\n    `Cliente: ${g.nome}\\n` +\n    `Perfil de investidor: ${g.perfil}\\n` +\n    `Saldo disponível: ${brl(g.saldo)}\\n` +\n    `Situação: ${\n      elegiveis.length\n        ? `saldo cobre o mínimo de ${elegiveis.length} opção(ões)`\n        : 'saldo abaixo do mínimo de todas as opções do perfil'\n    }\\n\\n` +\n    `Opções de investimento do perfil:\\n${tabela}`;\n\n  return {\n    json: {\n      nome: g.nome,\n      primeiro_nome: primeiroNome,\n      email: g.email,\n      perfil: g.perfil,\n      saldo: g.saldo,\n      saldo_formatado: brl(g.saldo),\n      opcoes_elegiveis: elegiveis.map(o => o.produto),\n      tabela_opcoes: tabela,\n      prompt,\n    },\n  };\n});\n"
+      },
+      "id": "c-tabela",
+      "name": "Code - Normalizar Tabela",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "response",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "type": "text",
+              "role": "system",
+              "content": "Você é um assessor de investimentos de um banco brasileiro, cordial e objetivo. Escreva UMA mensagem curta (até 4 frases) em português do Brasil para o cliente, chamando-o pelo primeiro nome. Use SOMENTE as opções de investimento fornecidas; nunca invente produtos, taxas ou garantias de retorno. Respeite o perfil e o saldo: se o saldo estiver abaixo do mínimo, oriente a chegar lá. Para renda variável, mencione brevemente o risco. Não use markdown nem emojis."
+            },
+            {
+              "type": "text",
+              "role": "user",
+              "content": "={{ $json.prompt }}"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": {}
+      },
+      "id": "c-openai",
+      "name": "Message a model",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        1100,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// N8N Code node (Run Once for All Items) — normaliza o e-mail e a mensagem gerada pelo modelo.\n// O nó do modelo não repassa os dados do cliente; os itens são casados pela posição.\nconst clientes = $('Code - Normalizar Tabela').all();\nconst respostas = $input.all();\n\nconst emailRegex = /^[a-z0-9._%+-]+@[a-z0-9-]+(\\.[a-z0-9-]+)*\\.[a-z]{2,}$/;\n\nconst extrairTexto = j => {\n  if (!j || j.error) return '';\n  if (typeof j.output_text === 'string') return j.output_text;\n  if (typeof j.text === 'string') return j.text;\n  if (typeof j.output === 'string') return j.output;\n  const partes = (Array.isArray(j.output) ? j.output : [])\n    .flatMap(o => o.content || [])\n    .map(c => c.text || '')\n    .filter(Boolean);\n  return partes.join('\\n');\n};\n\nreturn clientes.map(({ json: c }, i) => {\n  const email = String(c.email || '').trim().toLowerCase();\n  const gerada = extrairTexto(respostas[i]?.json).replace(/[*_#`>]/g, '').trim();\n\n  const padrao =\n    `Olá, ${c.primeiro_nome}! Com seu perfil ${c.perfil} e saldo de ${c.saldo_formatado}, ` +\n    `as opções disponíveis para você são: ${c.opcoes_elegiveis.join(', ') || 'nenhuma no momento'}.`;\n\n  const corpo = gerada || padrao;\n\n  return {\n    json: {\n      ...c,\n      email,\n      email_valido: email.length <= 254 && emailRegex.test(email),\n      mensagem_origem: gerada ? 'ia' : 'modelo_padrao',\n      assunto: `${c.primeiro_nome}, uma sugestão de investimento para o seu perfil ${c.perfil}`,\n      corpo,\n    },\n  };\n});\n"
+      },
+      "id": "c-email",
+      "name": "Code - Regras do E-mail",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c-if-cond",
+              "leftValue": "={{ $json.email_valido }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c-if",
+      "name": "E-mail válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1540,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.assunto }}",
+        "emailType": "text",
+        "message": "={{ $json.corpo }}",
+        "options": {}
+      },
+      "id": "c-gmail",
+      "name": "Send a message",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1760,
+        -100
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "options": {}
+      },
+      "id": "c-merge2",
+      "name": "Merge - Unir Resultados",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1980,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $('Code - Regras do E-mail').all().map(i => i.json) }}",
+        "options": {}
+      },
+      "id": "c-respond",
+      "name": "Responder ao Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2200,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Ler data.csv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler data.csv": {
+      "main": [
+        [
+          {
+            "node": "Code - Clientes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code - Investimentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Clientes": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Investimentos": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code - Normalizar Tabela",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Normalizar Tabela": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code - Regras do E-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Regras do E-mail": {
+      "main": [
+        [
+          {
+            "node": "E-mail válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-mail válido?": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge - Unir Resultados",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Merge - Unir Resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge - Unir Resultados": {
+      "main": [
+        [
+          {
+            "node": "Responder ao Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

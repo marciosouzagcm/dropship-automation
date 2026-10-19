@@ -1,0 +1,231 @@
+{
+  "name": "Assistente de Investimentos - Desafio (Agente de IA)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "clientes",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "n-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "clientes-rpa"
+    },
+    {
+      "parameters": {
+        "url": "http://docs/data.csv",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "n-csv",
+      "name": "Ler data.csv",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// N8N Code node (Run Once for All Items) — versão com IA.\n// Mesmo cruzamento da versão estática, mas em vez da mensagem pronta\n// devolve um \"prompt\" com o contexto do cliente para o Agente de IA.\n\nconst clientes = $('Webhook').first().json.body.clientes || [];\nconst csv = $input.first().json.data;\n\nconst [cabecalho, ...linhas] = csv.trim().split(/\\r?\\n/);\nconst colunas = cabecalho.split(',').map(c => c.trim());\nconst opcoes = linhas.filter(Boolean).map(l => {\n  const v = l.split(',');\n  const o = {};\n  colunas.forEach((c, i) => (o[c] = (v[i] || '').trim()));\n  o.minimo = Number(o.minimo);\n  return o;\n});\n\nconst parseSaldo = s => Number(String(s).replace(/[^\\d,]/g, '').replace(',', '.'));\nconst brl = n => 'R$ ' + n.toFixed(2).replace('.', ',').replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n\nreturn clientes.map(c => {\n  const saldo = parseSaldo(c.saldo);\n  const doPerfil = opcoes.filter(o => o.perfil === c.perfil);\n  const elegiveis = doPerfil.filter(o => o.minimo <= saldo);\n  const lista = (elegiveis.length ? elegiveis : doPerfil)\n    .map(o => `- ${o.produto}: mínimo ${brl(o.minimo)}, rentabilidade ${o.rentabilidade}`)\n    .join('\\n');\n\n  const prompt =\n    `Cliente: ${c.nome}\\n` +\n    `Perfil de investidor: ${c.perfil}\\n` +\n    `Saldo disponível: ${brl(saldo)}\\n` +\n    `Situação: ${elegiveis.length ? 'saldo cobre o mínimo de ' + elegiveis.length + ' opção(ões)' : 'saldo abaixo do mínimo de todas as opções do perfil'}\\n\\n` +\n    `Opções de investimento do perfil:\\n${lista}`;\n\n  return {\n    json: {\n      nome: c.nome,\n      email: c.email,\n      perfil: c.perfil,\n      saldo,\n      opcoes_elegiveis: elegiveis.map(o => o.produto),\n      prompt,\n    },\n  };\n});\n"
+      },
+      "id": "n-code",
+      "name": "Cruzar e Montar Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "Você é um assessor de investimentos de um banco brasileiro, cordial e objetivo. Escreva UMA mensagem curta (até 4 frases) em português do Brasil para o cliente, chamando-o pelo primeiro nome. Use SOMENTE as opções de investimento fornecidas; nunca invente produtos, taxas ou garantias de retorno. Respeite o perfil e o saldo: se o saldo estiver abaixo do mínimo, oriente a chegar lá. Para renda variável, mencione brevemente o risco. Não use markdown nem emojis."
+        }
+      },
+      "id": "n-agent",
+      "name": "Agente de IA",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "n-gemini",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        680,
+        220
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CONFIGURAR",
+          "name": "Google Gemini (PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "nome",
+              "value": "={{ $('Cruzar e Montar Prompt').item.json.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "email",
+              "value": "={{ $('Cruzar e Montar Prompt').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "perfil",
+              "value": "={{ $('Cruzar e Montar Prompt').item.json.perfil }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "saldo",
+              "value": "={{ $('Cruzar e Montar Prompt').item.json.saldo }}",
+              "type": "number"
+            },
+            {
+              "id": "a5",
+              "name": "mensagem",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n-set",
+      "name": "Montar Resposta",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "n-respond",
+      "name": "Responder ao Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1220,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Ler data.csv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler data.csv": {
+      "main": [
+        [
+          {
+            "node": "Cruzar e Montar Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cruzar e Montar Prompt": {
+      "main": [
+        [
+          {
+            "node": "Agente de IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de IA": {
+      "main": [
+        [
+          {
+            "node": "Montar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Responder ao Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de IA",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
